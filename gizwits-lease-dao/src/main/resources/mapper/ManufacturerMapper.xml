@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.manager.dao.ManufacturerDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.manager.entity.Manufacturer">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="name" property="name" />
+		<result column="industry" property="industry" />
+		<result column="web_site" property="webSite" />
+		<result column="sub_domain" property="subDomain" />
+		<result column="logo_url" property="logoUrl" />
+		<result column="phone" property="phone" />
+		<result column="mobile" property="mobile" />
+		<result column="contact" property="contact" />
+		<result column="department" property="department" />
+		<result column="email" property="email" />
+		<result column="qq" property="qq" />
+		<result column="province" property="province" />
+		<result column="city" property="city" />
+		<result column="area" property="area" />
+		<result column="address" property="address" />
+		<result column="parent_manufacturer_id" property="parentManufacturerId" />
+		<result column="sys_user_id" property="sysUserId" />
+	</resultMap>
+
+</mapper>

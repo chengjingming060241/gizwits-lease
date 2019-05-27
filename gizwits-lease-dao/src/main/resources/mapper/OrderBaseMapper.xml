@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.order.dao.OrderBaseDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.order.entity.OrderBase">
+        <id column="order_no" property="orderNo"/>
+        <result column="ctime" property="ctime"/>
+        <result column="utime" property="utime"/>
+        <result column="sno" property="sno"/>
+        <result column="mac" property="mac"/>
+        <result column="command" property="command"/>
+        <result column="service_mode_detail_id" property="serviceModeDetailId"/>
+        <result column="service_mode_id" property="serviceModeId"/>
+        <result column="service_mode_detail_id" property="serviceModeDetailId"/>
+        <result column="service_mode_name" property="serviceModeName"/>
+        <result column="order_status" property="orderStatus"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="pay_type" property="payType"/>
+        <result column="amount" property="amount"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="promotion_money" property="promotionMoney"/>
+
+        <result column="launch_area_id" property="launchAreaId"/>
+        <result column="launch_area_name" property="launchAreaName"/>
+        <result column="abnormal_reason" property="abnormalReason"/>
+        <result column="refund_result" property="refundResult"/>
+    </resultMap>
+
+    <select id="listReadyForShareBenefitOrder" resultMap="BaseResultMap" >
+        select o.*
+        from order_base o, order_status_flow os
+        where os.now_status=5 and o.order_status=5 and o.sno=#{sno} and o.order_no=os.order_no
+            <if test="lastExecuteTime != null">
+                and os.ctime <![CDATA[ >= ]]> #{lastExecuteTime}
+            </if>
+    </select>
+
+    <select id="findForStatOrder" resultType="map">
+        SELECT COUNT(o.`order_no`) as oCount,IFNULL(SUM(o.`amount`),0) as oAmount
+        FROM order_base o,device d
+        WHERE o.`sno` = #{sno}
+        AND o.`sno` = d.`sno`
+        <if test="null !=status and status.size>0">
+            AND o.`order_status` IN
+            <foreach item="item" index="index" collection="status" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        and date_format(o.`ctime`,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+    </select>
+
+    <select id="findForStatOrderWx" resultType="map">
+        SELECT COUNT(o.`order_no`) as oCountWx,IFNULL(SUM(o.`amount`),0) as oAmountWx
+        FROM order_base o,device d
+        WHERE o.`sno` = #{sno} and o.pay_type = 1
+        AND o.`sno` = d.`sno`
+        <if test="null !=status and status.size>0">
+            AND o.`order_status` IN
+            <foreach item="item" index="index" collection="status" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        and date_format(o.`ctime`,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+    </select>
+
+    <select id="findForStatOrderWallet" resultType="map">
+        SELECT COUNT(o.`order_no`) as oCountWallet,IFNULL(SUM(o.`amount`),0) as oAmountWallet
+        FROM order_base o,device d
+        WHERE o.`sno` = #{sno} and o.pay_type in (5,7,8)
+        AND o.`sno` = d.`sno`
+        <if test="null !=status and status.size>0">
+            AND o.`order_status` IN
+            <foreach item="item" index="index" collection="status" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        and date_format(o.`ctime`,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+    </select>
+
+    <select id="findByTradeNo" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT * FROM `order_base` where trade_no=#{VALUE,jdbcType=VARCHAR}
+	</select>
+
+    <select id="findByUserIdAndStatus" resultMap="BaseResultMap">
+		SELECT * FROM `order_base` where user_id=#{userId} and order_status=#{orderStatus}
+	</select>
+
+    <select id="findByDeviceIdAndStatus" resultMap="BaseResultMap">
+		SELECT * FROM `order_base` WHERE sno=#{deviceId} AND order_status=#{orderStatus} order by ctime desc limit 1
+	</select>
+
+    <select id="getOrderCount" resultType="int">
+        SELECT COUNT(DISTINCT o.`order_no`) FROM device d,order_base o
+        WHERE d.`sno` = o.`sno`
+        <if test="productId !=null">
+            AND d.`product_id` =#{productId}
+        </if>
+
+        <if test="fromDate != null ">
+            and o.`ctime` <![CDATA[ >= ]]> #{fromDate}
+        </if>
+        <if test="toDate != null  ">
+            and o.`ctime`  <![CDATA[ <= ]]> #{toDate }
+        </if>
+        <if test="null !=status and status.size>0">
+            AND o.`order_status` IN
+            <foreach item="item" index="index" collection="status" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        AND d.`owner_id` = #{sysUserId}
+    </select>
+
+
+    <resultMap id="listDto" type="com.gizwits.lease.order.dto.OrderBaseListDto">
+        <id column="order_no" property="orderNo"/>
+        <result column="user_name" property="userName"/>
+        <result column="sno" property="sno"/>
+        <result column="mac" property="deviceMac"/>
+        <result column="launch_area_name" property="deviceLaunchArea"/>
+        <result column="amount" property="pay"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="pay_type" property="payType"/>
+        <result column="service_mode_id" property="service_mode_id"/>
+        <result column="service_mode_name" property="serviceMode"/>
+        <result column="order_status" property="status"/>
+        <result column="abnormal_reason" property="abnormalReason"/>
+        <result column="mobile" property="mobile"/>
+        <result column="operator" property="operator"/>
+    </resultMap>
+
+    <resultMap id="lastOrderDto" type="com.gizwits.lease.order.dto.LastOrderForUserWalletChargeOrderDto">
+        <result column="sno" property="sno"/>
+        <result column="launch_area_name" property="launchAreaName" />
+        <result column="name" property="deviceName" />
+    </resultMap>
+
+    <select id="listPage" resultMap="listDto" parameterType="com.gizwits.lease.order.dto.OrderQueryDto">
+        select
+        b.order_no ,
+        b.service_mode_name ,
+        b.order_status ,b.pay_time ,b.pay_type ,
+        b.amount ,b.sno, b.mac,
+        b.user_name ,ifnull(b.launch_area_name,d.launch_area_name) as launch_area_name, b.service_mode_id,
+        b.abnormal_reason, u.mobile,o.name as operator
+        from order_base b join device d on b.mac = d.mac and b.sno = d.sno
+        left join user u on b.user_id = u.id
+        left join operator o on o.sys_account_id = b.sys_user_id
+        <include refid="query"></include>
+
+        order by b.ctime DESC
+        <include refid="limit_data"></include>
+    </select>
+
+    <select id="appListPage" resultMap="listDto" parameterType="com.gizwits.lease.order.dto.OrderQueryDto">
+        select
+        b.order_no ,
+        b.service_mode_name ,
+        b.order_status ,b.pay_time ,b.pay_type ,
+        b.amount , b.sno, b.mac,
+        b.user_name ,d.launch_area_name, b.service_mode_id
+        from order_base b join device d on b.mac = d.mac and b.sno = d.sno
+        <include refid="appListQuery"></include>
+
+        order by b.ctime DESC
+        <include refid="limit_data"></include>
+    </select>
+
+    <select id="findTotalSize" resultType="int" parameterType="com.gizwits.lease.order.dto.OrderQueryDto">
+        select count(distinct(order_no)) as cnt from order_base b join device d on b.mac = d.mac
+        left join user u on b.user_id = u.id
+        left join operator o on o.sys_account_id = b.sys_user_id
+        <include refid="query"></include>
+    </select>
+
+    <select id="findAppListTotalSize" resultType="int" parameterType="com.gizwits.lease.order.dto.OrderQueryDto">
+        select count(1) as cnt from order_base b join device d on b.mac = d.mac
+        <include refid="appListQuery"></include>
+    </select>
+
+    <sql id="query">
+        <where>
+            b.order_status != -1
+            <if test="deviceLaunchArea != null and deviceLaunchArea != ''">
+                and d.launch_area_name like concat('%',#{deviceLaunchArea},'%')
+            </if>
+            <if test="deviceMac != null and deviceMac != ''">
+                and b.mac like concat('%',#{deviceMac},'%')
+            </if>
+            <if test="userName != null and userName != ''">
+                and b.user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="operatorName != null and operatorName != ''">
+                and o.name like concat('%',#{operatorName},'%')
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and u.mobile like concat('%',#{mobile},'%')
+            </if>
+            <if test="userId != null and userId != ''">
+                and b.user_id =  #{userId}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                and b.order_no like concat('%', #{orderNo},'%')
+            </if>
+            <if test="status != null and status != ''">
+                and b.order_status = #{status}
+            </if>
+            <if test="deviceLaunchAreaId != null and deviceLaunchAreaId != ''">
+                and d.launch_area_id = #{deviceLaunchAreaId}
+            </if>
+           <if test="operatorAccountId != null and operatorAccountId != ''">
+                and d.owner_id = #{operatorAccountId}
+            </if>
+            <if test="payCardNum != null and payCardNum != ''">
+                and b.pay_card_num = #{payCardNum}
+            </if>
+            <if test="payType != null and payType != ''">
+                and b.pay_type = #{payType}
+            </if>
+            <if test="beginTime != null ">
+                and b.ctime <![CDATA[ >= ]]> #{beginTime}
+            </if>
+            <if test="beginTime != null  and endTime != null">
+                and b.ctime  <![CDATA[ <= ]]> #{endTime }
+            </if>
+            <if test="sysUserIds != null and sysUserIds.get(0) != null">
+                and b.sys_user_id IN
+                <foreach item="item" index="index" collection="sysUserIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="ids != null and ids.get(0) != null">
+                and b.order_no IN
+                <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <sql id="appListQuery">
+        <where>
+            <if test="beginTime != null ">
+                and b.ctime <![CDATA[ >= ]]> #{beginTime}
+            </if>
+            <if test="beginTime != null  and endTime != null">
+                and b.ctime  <![CDATA[ <= ]]> #{endTime }
+            </if>
+            <if test="operatorAccountId != null and operatorAccountId != ''">
+                and d.owner_id = #{operatorAccountId}
+            </if>
+            <if test="sysUserIds != null and sysUserIds.get(0) != null">
+                and b.sys_user_id IN
+                <foreach item="item" index="index" collection="sysUserIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+    <sql id="limit_data">
+		limit #{begin},#{pagesize}
+
+	</sql>
+
+    <select id="countNum" resultType="Integer" parameterType="com.gizwits.lease.order.dto.OrderQueryDto">
+        select
+        count(*)
+        from order_base b join device d on b.mac = d.mac and b.sno = d.sno
+        <include refid="query"></include>
+    </select>
+
+    
+    <select id="countUsingOrderByUserIdAndProductId" resultType="java.lang.Integer">
+        select count(*)
+        from order_base o, device d
+        where o.sno=d.sno and d.product_id=#{productId} and o.order_status=4 AND o.user_id=#{userId}
+	</select>
+
+    <select id="appListCountNum" resultType="Integer" parameterType="com.gizwits.lease.order.dto.OrderQueryDto">
+        select
+        count(*)
+        from order_base b join device d on b.mac = d.mac and b.sno = d.sno
+        <include refid="appListQuery"></include>
+    </select>
+
+    <select id="appListPaySum" resultType="java.lang.Double" parameterType="com.gizwits.lease.order.dto.OrderQueryDto">
+        select
+        SUM(b.amount)
+        from order_base b join device d on b.mac = d.mac and b.sno = d.sno
+        <include refid="appListQuery"></include>
+
+    </select>
+
+    <select id="earliestOrderTime" resultType="java.util.Date">
+        select min(ctime) from order_base
+    </select>
+    <select id="findLastUsingDevicePort" resultMap="BaseResultMap">
+        select o.* from order_base o ,order_ext_port p where o.order_no = p.order_no
+        and p.sno = #{sno} and p.port = #{port} and o.order_status = #{status} order by ctime desc limit 1
+    </select>
+
+    <select id="findUsingOrderByUserIdAndProductId" resultMap="BaseResultMap">
+        select o.*
+        from order_base o, device d
+        where o.sno=d.sno and d.product_id=#{productId} and o.order_status=4 AND o.user_id=#{userId}
+        order by ctime desc limit 1
+    </select>
+    
+    <select id="getLastOrderForUserWalletChargeOrder" resultMap="lastOrderDto">
+        SELECT
+        o.sno,
+        o.launch_area_name,
+        d.name
+        FROM
+        order_base o
+        LEFT JOIN device d ON o.mac = d.mac
+        WHERE
+        o.order_status = 5
+        AND o.pay_time <![CDATA[ < ]]> #{lastDate}
+        AND o.user_id = #{userId}
+        ORDER BY
+        o.pay_time DESC
+        LIMIT 1
+    </select>
+
+</mapper>

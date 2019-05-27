@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.device.dao.DeviceLaunchAreaDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.device.entity.DeviceLaunchArea">
+        <id column="id" property="id"/>
+        <result column="ctime" property="ctime"/>
+        <result column="utime" property="utime"/>
+        <result column="name" property="name"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="area" property="area"/>
+        <result column="mobile" property="mobile"/>
+        <result column="address" property="address"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="sys_user_name" property="sysUserName"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
+        <result column="person_in_charge" property="personInCharge"/>
+        <result column="person_in_charge_id" property="personInChargeId"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDelete"/>
+        <result column="owner_id" property="ownerId"/>
+    </resultMap>
+
+    <resultMap id="ResultMap" type="com.gizwits.lease.device.entity.dto.DeviceLaunchAreaAndServiceDto">
+        <id column="id" property="id"/>
+        <result column="ctime" property="ctime"/>
+        <result column="utime" property="utime"/>
+        <result column="name" property="name"/>
+        <result column="province" property="province"/>
+        <result column="city" property="city"/>
+        <result column="area" property="area"/>
+        <result column="mobile" property="mobile"/>
+        <result column="address" property="address"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="sys_user_name" property="sysUserName"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
+        <result column="person_in_charge" property="personInCharge"/>
+        <result column="person_in_charge_id" property="personInChargeId"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDelete"/>
+        <result column="owner_id" property="ownerId"/>
+        <result column="service_mode_id" property="serviceModeId"/>
+        <result column="service_mode_name" property="serviceModeName"/>
+        <result column="service_type" property="serviceType"/>
+        <result column="sys_user_name" property="owner"/>
+        <result column="price" property="price"/>
+        <result column="num" property="num"/>
+        <result column="normal_price" property="normalPrice"/>
+        <result column="normal_num" property="normalNum"/>
+        <result column="cold_price" property="coldPrice"/>
+        <result column="cold_num" property="coldNum"/>
+        <result column="warm_price" property="warmPrice"/>
+        <result column="warm_num" property="warmNum"/>
+    </resultMap>
+
+
+    <select id="findProvinceAndCount" resultType="map">
+        SELECT province,COUNT(DISTINCT d.`sno`) AS count FROM device d,device_launch_area a
+        WHERE d.`launch_area_id` = a.`id` AND d.`owner_id` = #{sysUserId}
+        and d.is_deleted =0
+        and d.status !=6
+        <if test="productId !=null">
+            AND d.product_id = #{productId}
+        </if>
+        GROUP BY province
+    </select>
+
+    <select id="listPageTotal" resultType="java.lang.Integer" parameterType="com.gizwits.lease.device.entity.dto.DeviceLaunchAreaQueryDto">
+        select count(d.id) from device_launch_area d
+        <include refid="query"></include>
+    </select>
+
+    <select id="listPage" resultMap="ResultMap" parameterType="com.gizwits.lease.device.entity.dto.DeviceLaunchAreaQueryDto">
+        select distinct d.*,p.service_type, p.sys_user_name,p.price,p.num,p.normal_price,p.normal_num,
+        p.cold_price,p.cold_num,p.warm_price,p.warm_num
+        from device_launch_area d
+        left join product_service_detail p on d.service_mode_id = p.service_mode_id and p.is_deleted = 0
+        <include refid="query"></include>
+        ORDER BY d.id DESC
+        limit #{begin},#{pagesize}
+    </select>
+
+    <sql id="query">
+        <where>
+            <if test="name != null">
+                and d.`NAME` like concat('%',#{name},'%')
+            </if>
+            <if test="accessableUserIds != null and accessableUserIds.size() > 0">
+                and
+                (
+                d.sys_user_id IN
+                <foreach item="item" index="index" collection="accessableUserIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                or d.owner_id IN
+                <foreach item="item" index="index" collection="accessableUserIds" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                )
+            </if>
+            <if test="ids != null and ids.size()>0">
+                and d.id IN
+                <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            and d.status = 1 and d.is_deleted = 0
+
+        </where>
+
+    </sql>
+
+</mapper>

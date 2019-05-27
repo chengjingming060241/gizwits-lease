@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.product.dao.BrandDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.product.entity.Brand">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="name" property="name" />
+		<result column="brand_serial_number" property="brandSerialNumber" />
+		<result column="logo_url" property="logoUrl" />
+		<result column="introduce" property="introduce" />
+		<result column="create_time" property="createTime" />
+		<result column="manufacturer_id" property="manufacturerId" />
+		<result column="manufacturer_name" property="manufacturerName" />
+	</resultMap>
+
+</mapper>

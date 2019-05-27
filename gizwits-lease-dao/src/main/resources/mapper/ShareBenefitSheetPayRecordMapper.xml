@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.benefit.dao.ShareBenefitSheetPayRecordDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.benefit.entity.ShareBenefitSheetPayRecord">
+		<id column="id" property="id" />
+		<result column="sheet_id" property="sheetId" />
+		<result column="trade_no" property="tradeNo" />
+		<result column="amount" property="amount" />
+		<result column="content" property="content" />
+		<result column="status" property="status" />
+		<result column="user_id" property="userId" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="callback_content" property="callbackContent" />
+	</resultMap>
+
+</mapper>

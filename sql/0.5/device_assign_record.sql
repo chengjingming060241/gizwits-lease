@@ -1,0 +1,1 @@
+ALTER TABLE device_assign_record ADD operate_type VARCHAR(16) DEFAULT 'ASSIGN' NOT NULL COMMENT '操作类型:ASSIGN和UNBIND';

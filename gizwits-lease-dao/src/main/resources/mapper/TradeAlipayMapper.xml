@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.trade.dao.TradeAlipayDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.trade.entity.TradeAlipay">
+		<id column="trade_no" property="tradeNo" />
+		<result column="alipay_id" property="alipayId" />
+		<result column="appid" property="appid" />
+		<result column="seller_id" property="sellerId" />
+		<result column="subject" property="subject" />
+		<result column="time_end" property="timeEnd" />
+		<result column="return_url" property="returnUrl" />
+		<result column="trade_status" property="tradeStatus" />
+	</resultMap>
+
+	<select id="selectLastTrade" resultMap="BaseResultMap">
+		SELECT w.*
+		FROM trade_base b, trade_alipay w
+		WHERE b.trade_no=w.trade_no and b.order_no=#{orderNo}
+		ORDER BY b.ctime DESC limit 1
+	</select>
+
+</mapper>

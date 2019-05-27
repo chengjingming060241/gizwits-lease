@@ -1,0 +1,1 @@
+alter table stat_device_order_widget add column ordered_count int default '0' null comment '今天下单设备数';

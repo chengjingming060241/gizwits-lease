@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.benefit.dao.ShareBenefitRuleDetailDeviceDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.benefit.entity.ShareBenefitRuleDetailDevice">
+		<id column="id" property="id" />
+		<result column="rule_detail_id" property="ruleDetailId" />
+		<result column="sno" property="sno" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="is_deleted" property="isDeleted" />
+	</resultMap>
+
+	<resultMap id="DetailResultMap" type="com.gizwits.lease.benefit.entity.dto.ShareBenefitRuleDeviceVo">
+		<result column="rule_detail_device_id" property="ruleDetailDeviceId" />
+		<result column="rule_detail_id" property="ruleDetailId" />
+		<result column="sno" property="sno" />
+		<result column="share_percentage" property="sharePercentage" />
+		<result column="children_percentage" property="childrenPercentage" />
+		<result column="rule_id" property="ruleId" />
+		<result column="start_time" property="startTime" />
+		<result column="last_execute_time" property="lastExecuteTime" />
+		<result column="sys_account_id" property="sysAccountId" />
+		<result column="operator_name" property="operatorName" />
+	</resultMap>
+	
+	<select id="selectRuleBySnoAndSysAccountId" resultMap="DetailResultMap">
+		SELECT detail.id as rule_detail_id,device.sno as sno,device.share_percentage as share_percentage,device.children_percentage as children_percentage,rule.operator_name as operator_name,
+			rule.id as rule_id,rule.start_time as start_time,rule.last_execute_time as last_execute_time,rule.sys_account_id as sys_account_id,device.id as rule_detail_device_id
+		FROM share_benefit_rule rule,share_benefit_rule_detail detail,share_benefit_rule_detail_device device
+		WHERE rule.id=detail.rule_id and detail.id=device.rule_detail_id and rule.is_deleted=0
+			and detail.is_deleted=0 and device.is_deleted=0 and device.sno=#{sno} and rule.sys_account_id=#{sysAccountId}
+	</select>
+
+	<select id="selectRulesBySno" resultMap="DetailResultMap">
+		SELECT detail.id as rule_detail_id,device.sno as sno,device.share_percentage as share_percentage,device.children_percentage as children_percentage,rule.operator_name as operator_name,
+		rule.id as rule_id,rule.start_time as start_time,rule.last_execute_time as last_execute_time,rule.sys_account_id as sys_account_id,device.id as rule_detail_device_id
+		FROM share_benefit_rule rule,share_benefit_rule_detail detail,share_benefit_rule_detail_device device
+		WHERE rule.id=detail.rule_id and detail.id=device.rule_detail_id and rule.is_deleted=0
+		and detail.is_deleted=0 and device.is_deleted=0 and device.sno=#{sno}
+	</select>
+
+	<select id="selectRuleDevicesBySnos" resultMap="DetailResultMap">
+		SELECT detail.id as rule_detail_id,device.sno as sno,device.share_percentage as share_percentage,device.children_percentage as children_percentage,rule.operator_name as operator_name,
+		rule.id as rule_id,rule.start_time as start_time,rule.last_execute_time as last_execute_time,rule.sys_account_id as sys_account_id,device.id as rule_detail_device_id
+		FROM share_benefit_rule rule,share_benefit_rule_detail detail,share_benefit_rule_detail_device device
+		WHERE rule.id=detail.rule_id and detail.id=device.rule_detail_id and rule.is_deleted=0
+		and detail.is_deleted=0 and device.is_deleted=0
+		<if test="sysAccountId != null">
+			and rule.sys_account_id = #{sysAccountId}
+		</if>
+		<if test="ruleId != null">
+			and rule.id = #{ruleId}
+		</if>
+		<if test="snoList != null and snoList.get(0) !=null">
+			and device.sno in
+			<foreach item="item" index="index" collection="snoList" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+	<select id="selectDeviceRuleByRuleId" resultMap="DetailResultMap">
+		SELECT detail.id as rule_detail_id,device.sno as sno,device.share_percentage as share_percentage,device.children_percentage as children_percentage,rule.operator_name as operator_name,
+			rule.id as rule_id,rule.start_time as start_time,rule.last_execute_time as last_execute_time,rule.sys_account_id as sys_account_id,device.id as rule_detail_device_id
+		FROM share_benefit_rule rule,share_benefit_rule_detail detail,share_benefit_rule_detail_device device
+		WHERE rule.id=detail.rule_id and detail.id=device.rule_detail_id and rule.is_deleted=0
+			and detail.is_deleted=0 and device.is_deleted=0 and rule.id=#{ruleId}
+	</select>
+
+	<update id="updateParentDeviceSharePercentage" parameterType="com.gizwits.lease.benefit.entity.dto.ShareBenefitDeviceUpdateDto">
+		UPDATE share_benefit_rule_detail_device device
+		LEFT JOIN share_benefit_rule_detail detail ON detail.id=device.rule_detail_id
+		SET device.children_percentage=#{childrenPercentage},device.utime=now()
+		WHERE detail.rule_id=#{ruleId} AND detail.is_deleted=0 AND device.is_deleted=0 AND device.sno IN
+		<foreach item="item" index="index" collection="deviceSnoList" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<update id="updateDeviceForOperatorToDeleted" >
+		UPDATE share_benefit_rule_detail_device device
+		LEFT JOIN share_benefit_rule_detail detail ON detail.id=device.rule_detail_id
+		SET device.is_deleted=1
+		WHERE detail.rule_id=#{ruleId} AND detail.is_deleted=0 AND device.is_deleted=0 AND device.sno=#{sno}
+	</update>
+
+</mapper>

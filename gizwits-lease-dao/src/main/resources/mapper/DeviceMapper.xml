@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.device.dao.DeviceDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.device.entity.Device">
+        <id column="sno" property="sno"/>
+        <result column="ctime" property="ctime"/>
+        <result column="utime" property="utime"/>
+        <result column="name" property="name"/>
+        <result column="mac" property="mac"/>
+        <result column="work_status" property="workStatus"/>
+        <result column="online_status" property="onlineStatus"/>
+        <result column="fault_status" property="faultStatus"/>
+        <result column="status" property="status"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="last_online_time" property="lastOnlineTime"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
+        <result column="launch_area_id" property="launchAreaId"/>
+        <result column="launch_area_name" property="launchAreaName"/>
+        <result column="product_id" property="productId"/>
+        <result column="product_name" property="productName"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="agent_id" property="agentId"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="giz_did" property="gizDid"/>
+        <result column="giz_pass_code" property="gizPassCode"/>
+        <result column="owner_id" property="ownerId"/>
+
+        <result column="giz_ws_port" property="gizWsPort"/>
+        <result column="giz_wss_port" property="gizWssPort"/>
+        <result column="giz_host" property="gizHost"/>
+
+        <result column="wx_did" property="wxDid"/>
+        <result column="wx_ticket" property="wxTicket"/>
+        <result column="content_url" property="contentUrl"/>
+        <result column="group_id" property="groupId"/>
+        <result column="entry_time" property="entryTime"/>
+        <result column="shift_out_time" property="shiftOutTime"/>
+        <result column="expiration_time" property="expirationTime"/>
+
+        <result column="abnormal_times" property="abnormalTimes"/>
+        <result column="lock" property="lock"/>
+    </resultMap>
+
+    <select id="getDiffSysUserId" resultType="int">
+		select DISTINCT sys_user_id from device
+		WHERE sys_user_id IS NOT NULL and is_deleted=0 and status !=6
+	</select>
+
+    <select id="getDiffOwnerId" resultType="int">
+        select DISTINCT owner_id from device
+        WHERE owner_id IS NOT NULL
+        and is_deleted =0
+        and status !=6
+    </select>
+
+    <select id="getProductId" resultType="int">
+      select distinct d.`product_id`
+      from device d
+      WHERE d.owner_id = #{sysUserId}
+      AND d.product_id IS NOT NULL and d.is_deleted=0 and d.status !=6
+
+    </select>
+
+    <select id="getProductIdAndKey" resultType="map">
+        select distinct d.`product_id`as productId,p.`gizwits_product_key` as productKey
+        from device d,product p
+        where d.`product_id` = p.`id`
+        AND d.product_id IS NOT NULL and d.is_deleted=0 and d.status !=6
+    </select>
+
+    <select id="getTotalBySysUserIdAndIsNotDeleted" resultType="int">
+        SELECT count(DISTINCT sno) FROM device
+        WHERE owner_id= #{sysUserId}
+        AND is_deleted = 0
+        and status != 6
+        <if test="productId != null">
+            AND product_id = #{productId}
+        </if>
+        <if test="endTime !=null">
+            and ctime <![CDATA[<]]> #{endTime}
+        </if>
+    </select>
+
+    <select id="findByMacAndProductKey" resultMap="BaseResultMap">
+        SELECT d.*
+        FROM device d,product p
+        WHERE d.product_id=p.id
+        AND d.mac=#{mac,jdbcType=VARCHAR }
+        AND p.gizwits_product_key=#{productKey,jdbcType=VARCHAR }
+        and p.is_deleted=0
+        and d.is_deleted=0
+    </select>
+
+    <select id="getNewCount" resultType="int">
+        SELECT COUNT(DISTINCT sno) FROM device
+        WHERE ctime between #{start} and #{end}
+        AND is_deleted = 0
+        AND owner_id = #{sysUserId}
+        AND product_id = #{productId}
+        AND status !=6
+    </select>
+
+
+    <select id="getOrderedCount" resultType="int">
+        SELECT COUNT(DISTINCT d.`sno`) FROM device d,(select sno from order_base where ctime between #{start} and #{end} group by sno) o
+        WHERE o.`sno` = d.`sno`
+        AND d.`owner_id` = #{sysUserId}
+        AND d.is_deleted=0
+        and d.status !=6
+        <if test="productId != null">
+            AND d.`product_id` = #{productId}
+        </if>
+    </select>
+
+    <select id="getAlarmCount" resultType="int">
+        SELECT COUNT(DISTINCT d.`sno`)
+        FROM device d,device_alarm a
+        WHERE d.`sno` = a.`sno`
+        AND a.`alarm_type` = 1
+        and d.is_deleted=0
+        and d.fault_status = 6
+        and a.status = 0
+        <if test="productId != null">
+            AND product_id = #{productId}
+        </if>
+        AND d.`owner_id` = #{sysUserId}
+    </select>
+
+    <select id="getWarnCount" resultType="int">
+        SELECT COUNT(DISTINCT d.`sno`)
+        FROM device d,device_alarm a
+        WHERE d.`sno` = a.`sno`
+        AND a.`alarm_type` = 2
+        and d.is_deleted=0
+        and d.fault_status = 6
+        and a.status = 0
+        <if test="productId != null">
+            AND d.`product_id` = #{productId}
+        </if>
+
+        AND d.`owner_id` = #{sysUserId}
+
+    </select>
+
+    <select id="getSnoByOpenid" resultType="string">
+        SELECT o.`sno` FROM `user` u,order_base o
+        WHERE o.`user_id` = u.`id`
+        AND o.`order_status` = #{status}
+        AND u.`openid` = #{openid}
+        ORDER BY o.`ctime` DESC LIMIT 0,1
+
+    </select>
+
+    <select id="getDeviceWithoutArea" resultType="Integer">
+        select COUNT(DISTINCT sno) from device where owner_id = #{ownerId}
+        and  launch_area_id is  null and is_deleted = 0 and status !=6
+        <if test="productId != null">
+            AND `product_id` = #{productId}
+        </if>
+
+    </select>
+
+    <!--活跃设备数，这里改为从设备上报记录表中进行统计-->
+    <select id="getActiveCount" resultType="int">
+        SELECT COUNT(DISTINCT d.sno) FROM device d,device_running_record dc
+        where d.is_deleted = 0
+        AND d.owner_id = #{sysUserId}
+        AND d.product_id = #{productId}
+        AND d.status !=6
+        AND d.sno=dc.sno
+        AND dc.ctime <![CDATA[ >= ]]> #{startTime}
+        AND dc.ctime <![CDATA[ < ]]> #{endTime}
+    </select>
+
+</mapper>

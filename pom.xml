@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.gizwits</groupId>
+    <artifactId>gizwits-lease</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>Gizwits-Boot Maven Webapp</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+      <repository>
+        <id>nexus-daocloud</id>
+        <name>Nexus daocloud</name>
+        <url>http://nexus.daocloud.io/repository/maven-public/</url>
+      </repository>
+      <repository>
+        <id>archiva.internal</id>
+        <name>Gizwits Internal Repo</name>
+        <url>https://archiva.gizwits.com/repository/internal/</url>
+      </repository>
+    </repositories>
+    
+    <distributionManagement>
+      <repository>
+        <id>archiva.internal</id>
+        <name>Internal Release Repository</name>
+        <url>https://archiva.gizwits.com/repository/internal/</url>
+      </repository>
+    </distributionManagement>
+
+    <dependencies>
+        <!--需要安装lombok插件并开启annotation-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.gizwits</groupId>
+            <artifactId>gizwits-boot</artifactId>
+            <version>0.1-qek</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>4.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <modules>
+        <module>gizwits-lease-backend</module>
+        <module>gizwits-lease-app</module>
+        <module>gizwits-lease-job</module>
+        <module>gizwits-lease-model</module>
+        <module>gizwits-lease-dao</module>
+        <module>gizwits-lease-service</module>
+        <module>gizwits-lease-common</module>
+        <module>gizwits-lease-netty</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

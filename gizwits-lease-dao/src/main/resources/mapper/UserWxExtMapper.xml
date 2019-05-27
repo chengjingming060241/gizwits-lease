@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.user.dao.UserWxExtDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.user.entity.UserWxExt">
+		<id column="id" property="id" />
+		<result column="user_openid" property="userOpenid" />
+		<result column="openid" property="openid" />
+		<result column="wx_id" property="wxId" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="status" property="status" />
+		<result column="move_in_black_time" property="moveInBlackTime" />
+		<result column="move_out_black_time" property="moveOutBlackTime" />
+		<result column="authorization_time" property="authorizationTime" />
+	</resultMap>
+
+	<resultMap id="BaseUserResultMap" type="com.gizwits.lease.user.entity.User">
+		<id column="id" property="id"/>
+		<result column="username" property="username"/>
+		<result column="ctime" property="ctime"/>
+		<result column="utime" property="utime"/>
+		<result column="nickname" property="nickname"/>
+		<result column="openid" property="openid"/>
+		<result column="alipay_unionid" property="alipayUnionid"/>
+		<result column="sina_unionid" property="sinaUnionid"/>
+		<result column="baidu_unionid" property="baiduUnionid"/>
+		<result column="third_party" property="thirdParty"/>
+		<result column="password" property="password"/>
+		<result column="mobile" property="mobile"/>
+		<result column="email" property="email"/>
+		<result column="gender" property="gender"/>
+		<result column="avatar" property="avatar"/>
+		<result column="birthday" property="birthday"/>
+		<result column="province" property="province"/>
+		<result column="city" property="city"/>
+		<result column="address" property="address"/>
+		<result column="remark" property="remark"/>
+		<result column="wx_id" property="wxId"/>
+		<result column="sys_user_id" property="sysUserId"/>
+		<result column="status" property="status"/>
+	</resultMap>
+	
+	<select id="findUserByOpenids"  resultMap="BaseUserResultMap">
+		SELECT u.id, u.username, u.ctime, u.nickname, u.third_party, u.password, u.mobile, u.email, u.gender, u.avatar, u.birthday, u.province, u.city, u.address, u.remark, u.wx_id, ext.sys_user_id, ext.status as status , ext.openid as openid
+		FROM user_wx_ext ext,user u
+		WHERE 1=1 and ext.openid=u.openid
+		<if test="openids != null and openids.get(0) != null">
+			and ext.openid IN
+			<foreach item="item" index="index" collection="openids" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="sysUserIds != null and sysUserIds.get(0) != null">
+			and ext.sys_user_id IN
+			<foreach item="item" index="index" collection="sysUserIds" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+</mapper>

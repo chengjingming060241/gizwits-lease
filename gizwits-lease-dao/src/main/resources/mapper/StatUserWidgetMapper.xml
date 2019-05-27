@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatUserWidgetDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.stat.entity.StatUserWidget">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="total_count" property="totalCount" />
+		<result column="new_percent" property="newPercent" />
+		<result column="active_count" property="activeCount" />
+		<result column="active_percent" property="activePercent" />
+		<result column="new_count" property="newCount" />
+
+	</resultMap>
+
+	<update id="updateByUtimeAndSysUserId">
+		UPDATE stat_user_widget SET total_count = #{widget.totalCount} ,active_count =#{widget.activeCount},utime=#{widget.utime}
+		WHERE sys_user_id =#{widget.sysUserId}
+		AND DATE_FORMAT(utime,'%Y-%m-%d') = DATE_FORMAT(#{widget.utime},'%Y-%m-%d')
+	</update>
+
+	<select id="widget" resultMap="BaseResultMap">
+		select DISTINCT total_count,new_percent,active_count,active_percent
+		from stat_user_widget
+		where sys_user_id = #{sysUserId}
+		and date_format(utime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+	</select>
+
+	<select id="widgetByIds" resultMap="BaseResultMap">
+		select sum(total_count) total_count, sum(new_count) new_count, sum(active_count) active_count
+		from stat_user_widget
+		where date_format(utime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+		<if test="null !=ids and ids.size>0">
+			AND sys_user_id IN
+			<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+
+
+</mapper>

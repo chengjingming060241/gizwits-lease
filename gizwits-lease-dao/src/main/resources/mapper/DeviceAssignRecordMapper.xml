@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.device.dao.DeviceAssignRecordDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.device.entity.DeviceAssignRecord">
+		<id column="id" property="id" />
+		<result column="sno" property="sno" />
+		<result column="mac" property="mac" />
+		<result column="source_operator" property="sourceOperator" />
+		<result column="destination_operator" property="destinationOperator" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="sys_user_name" property="sysUserName" />
+	</resultMap>
+
+</mapper>

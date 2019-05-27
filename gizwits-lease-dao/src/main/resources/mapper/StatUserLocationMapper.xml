@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatUserLocationDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.stat.entity.StatUserLocation">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="province_id" property="provinceId" />
+		<result column="province" property="province" />
+		<result column="user_count" property="userCount" />
+		<result column="proportion" property="proportion" />
+	</resultMap>
+
+	<select id="getDistribution" resultMap="BaseResultMap">
+		SELECT province,sum(user_count) user_count FROM stat_user_location
+		where date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+		<if test="null !=ids and ids.size>0">
+			AND sys_user_id IN
+			<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY province
+	</select>
+
+	<select id="getRank" resultMap="BaseResultMap">
+		SELECT province,sum(user_count) user_count FROM stat_user_location
+		where date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+		<if test="null !=ids and ids.size>0">
+			AND sys_user_id IN
+			<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		GROUP BY province
+		ORDER BY user_count DESC
+		limit 0,10
+	</select>
+</mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>gizwits-lease</artifactId>
+        <groupId>com.gizwits</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.gizwits</groupId>
+    <artifactId>gizwits-lease-netty</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>gizwits-lease-netty</name>
+
+    <!--  开发的时候使用 jrebel 热部署  -->
+    <!--<packaging>jar</packaging>-->
+    <packaging>war</packaging>
+    <!--  开发的时候使用 jrebel 热部署  -->
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <noti.version>1.8.2-RELEASE</noti.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.gizwits.noti</groupId>
+            <artifactId>noti-client</artifactId>
+            <version>${noti.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <version>1.5.3.RELEASE</version>
+            <!--  开发的时候使用 jrebel 热部署  -->
+            <!--<scope>provided</scope>-->
+            <!--  开发的时候使用 jrebel 热部署  -->
+        </dependency>
+        <dependency>
+            <groupId>com.gizwits</groupId>
+            <artifactId>gizwits-lease-service</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+
+    <!--将应用打成war包的配置-->
+    <build>
+        <plugins>
+            <!-- 跳过Test -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

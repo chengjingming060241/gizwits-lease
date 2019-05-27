@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.device.dao.DeviceRunningRecordDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.device.entity.DeviceRunningRecord">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="sno" property="sno" />
+		<result column="mac" property="mac" />
+		<result column="work_status" property="workStatus" />
+		<result column="content" property="content" />
+	</resultMap>
+
+	<resultMap id="listDto" type="com.gizwits.lease.device.vo.DeviceRunningRecordForOfflineListDto">
+		<id column="id" property="id"/>
+		<result column="sno" property="sno"/>
+		<result column="mac" property="mac"/>
+		<result column="launch_area_name" property="area"/>
+		<result column="ctime" property="ctime"/>
+		<result column="nick_name" property="owner"/>
+	</resultMap>
+
+	<select id="offlineList" resultMap="listDto" parameterType="com.gizwits.lease.device.vo.DeviceRunningRecordForQueryDto">
+		select
+		r.id,r.sno,r.mac,r.ctime,d.launch_area_name,u.nick_name
+		from device_running_record r join device d on r.mac = d.mac and r.sno = d.sno
+		left join sys_user u on d.owner_id = u.id
+		<include refid="query"></include>
+		order by r.ctime desc
+		<include refid="limit_data"></include>
+	</select>
+
+	<select id="findTotalSize" resultType="int" parameterType="com.gizwits.lease.device.vo.DeviceRunningRecordForQueryDto">
+		select count(1)
+		from device_running_record r join device d on r.mac = d.mac and r.sno = d.sno
+		left join sys_user u on d.owner_id = u.id
+		<include refid="query"></include>
+	</select>
+
+	<sql id="query">
+		<where>
+			r.work_status = 2 and r.is_read = 0 and d.operate_status = 1
+			<if test="deviceSno != null and deviceSno != ''">
+				and r.sno = #{deviceSno}
+			</if>
+			<if test="startTime != null ">
+				and r.ctime <![CDATA[ >= ]]> #{startTime}
+			</if>
+			<if test="startTime != null and endTime != null">
+				and r.ctime  <![CDATA[ <= ]]> #{endTime }
+			</if>
+		</where>
+	</sql>
+
+	<sql id="limit_data">
+		limit #{begin},#{pagesize}
+	</sql>
+
+</mapper>

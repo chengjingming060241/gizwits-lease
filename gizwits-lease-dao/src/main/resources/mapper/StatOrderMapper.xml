@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatOrderDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.stat.entity.StatOrder">
+        <id column="id" property="id"/>
+        <result column="ctime" property="ctime"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="sno" property="sno"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="order_amount" property="orderAmount"/>
+        <result column="order_count" property="orderCount"/>
+        <result column="ordered_percent" property="orderedPercent"/>
+        <result column="order_amount_wx" property="orderAmountWx"/>
+        <result column="order_count_wx" property="orderCountWx"/>
+        <result column="order_amount_wallet" property="orderAmountWallet"/>
+        <result column="order_count_wallet" property="orderCountWallet"/>
+    </resultMap>
+
+    <select id="getOrderAnalysis" resultMap="BaseResultMap">
+        SELECT o.ctime as ctime,sum(o.order_count) as order_count,sum(o.order_amount) as
+        order_amount,avg(o.ordered_percent) as ordered_percent,sum(o.order_count_wx) as order_count_wx,sum(o.order_amount_wx) as
+        order_amount_wx,sum(o.order_count_wallet) as order_count_wallet,sum(o.order_amount_wallet) as
+        order_amount_wallet FROM stat_order o
+        left join device d on o.sno = d.sno
+        left join operator r on o.operator_id = r.id
+        WHERE o.`sys_user_id` = #{sysUserId}
+        <if test="dto.productId !=null and dto.productId != 0">
+            AND d.`product_id`=#{dto.productId}
+        </if>
+        <if test="dto.sno != null and dto.sno != 0">
+            AND o.`sno` = #{dto.sno}
+        </if>
+        <if test="dto.operatorId !=null and dto.operatorId !=0">
+            AND o.`operator_id` = #{dto.operatorId}
+        </if>
+        <if test="dto.fromDate !=null and dto.toDate != null">
+            And Date_format(o.`ctime`,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+            Date_format(#{dto.toDate},'%Y-%m-%d')
+        </if>
+        <if test="dto.launchAreaName != null and dto.launchAreaName != ''">
+            and d.launch_area_name = #{dto.launchAreaName}
+        </if>
+        <if test="dto.operator != null and dto.operator != ''">
+            and r.name = #{dto.operator}
+        </if>
+        <if test="dto.mac != null and dto.mac != ''">
+            and d.mac = #{dto.mac}
+        </if>
+        GROUP BY o.`ctime`
+        ORDER BY o.`ctime`
+    </select>
+
+    <select id="getOrderAnalysisByIds" resultMap="BaseResultMap">
+        SELECT o.`ctime` as ctime,sum(o.order_count) as order_count,sum(o.order_amount) as
+        order_amount,sum(o.order_count_wx) as order_count_wx,sum(o.order_amount_wx) as
+        order_amount_wx,sum(o.order_count_wallet) as order_count_wallet,sum(o.order_amount_wallet) as
+        order_amount_wallet FROM stat_order o
+        left join device d on o.sno = d.sno
+        left join operator r on o.operator_id = r.id
+        WHERE 1=1
+        <if test="null !=ids and ids.size>0">
+            AND o.`sys_user_id` IN
+            <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="dto.productId !=null and dto.productId != 0">
+            AND d.`product_id`=#{dto.productId}
+        </if>
+        <if test="dto.sno != null and dto.sno != 0">
+            AND o.`sno` = #{dto.sno}
+        </if>
+        <if test="dto.operatorId !=null and dto.operatorId !=0">
+            AND o.`operator_id` = #{dto.operatorId}
+        </if>
+        <if test="dto.fromDate !=null and dto.toDate != null">
+            And Date_format(o.`ctime`,#{dto.dateFormat}) between Date_format(#{dto.fromDate},#{dto.dateFormat}) and
+            Date_format(#{dto.toDate},#{dto.dateFormat})
+        </if>
+        <if test="dto.launchAreaName != null and dto.launchAreaName != ''">
+            and d.launch_area_name = #{dto.launchAreaName}
+        </if>
+        <if test="dto.operator != null and dto.operator != ''">
+            and r.name = #{dto.operator}
+        </if>
+        <if test="dto.mac != null and dto.mac != ''">
+            and d.mac = #{dto.mac}
+        </if>
+        GROUP BY Date_format(o.`ctime`,#{dto.dateFormat})
+        ORDER BY o.`ctime`
+    </select>
+</mapper>

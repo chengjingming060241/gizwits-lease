@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.wallet.dao.UserWalletUseRecordDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.wallet.entity.UserWalletUseRecord">
+		<id column="id" property="id" />
+		<result column="trade_no" property="tradeNo"/>
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="wallet_type" property="walletType" />
+		<result column="wallet_name" property="walletName" />
+		<result column="fee" property="fee" />
+		<result column="balance" property="balance" />
+		<result column="operation_type" property="operationType" />
+		<result column="username" property="username" />
+		<result column="user_id" property="userId"/>
+	</resultMap>
+
+	<resultMap id="ListResultMap" type="com.gizwits.lease.wallet.dto.UserWalletUseRecordDto">
+		<id column="id" property="id" />
+		<result column="ctime" property="time" />
+		<result column="fee" property="fee" />
+		<result column="balance" property="balance" />
+		<result column="operation_type" property="operatorType" />
+		<result column="username" property="username" />
+	</resultMap>
+
+	<select id="listUserWalletUseRecord1" resultMap="ListResultMap">
+		SELECT fee,sum(balance) as balance ,
+		ctime,operation_type
+		FROM user_wallet_use_record
+		where username =#{username} and operation_type = #{operation_type}
+		group by trade_no
+		ORDER BY ctime desc
+		limit #{begin},#{pagesize}
+	</select>
+
+	<select id="countNum1" resultType="Integer">
+		select count(*) from user_wallet_use_record
+		where username =#{username} and operation_type = #{operation_type}
+	</select>
+
+	<select id="listUserWalletUseRecord2" resultMap="BaseResultMap">
+		SELECT trade_no,ctime,fee,balance,operation_type
+		FROM user_wallet_use_record
+		where username =#{username}
+		group by trade_no
+		limit #{begin},#{pagesize}
+	</select>
+
+	<select id="countNum2" resultType="Integer">
+		select count(*) from user_wallet_use_record
+		where username =#{username}
+	</select>
+</mapper>

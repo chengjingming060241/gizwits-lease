@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.wallet.dao.UserWalletChargeOrderDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.wallet.entity.UserWalletChargeOrder">
+		<id column="charge_order_no" property="chargeOrderNo" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="wallet_type" property="walletType" />
+		<result column="wallet_name" property="walletName" />
+		<result column="fee" property="fee" />
+		<result column="balance" property="balance" />
+		<result column="status" property="status" />
+		<result column="username" property="username" />
+		<result column="pay_time" property="payTime" />
+		<result column="pay_type" property="payType" />
+		<result column="user_id" property="userId"/>
+	</resultMap>
+
+	<resultMap id="deposit" type="com.gizwits.lease.wallet.dto.DepositListDto">
+		<id column="charge_order_no" property="chargeOrderNo" />
+		<result column="fee" property="money" />
+		<result column="pay_time" property="payTime" />
+		<result column="pay_type" property="payType" />
+		<result column="mobile" property="mobile"/>
+		<result column="nickname" property="nickName"/>
+		<result column="launch_area_name" property="launchAreaName" />
+		<result column="device_name" property="deviceName" />
+	</resultMap>
+
+	<select id="listDeposit" resultMap="deposit" parameterType="com.gizwits.lease.wallet.dto.DepositQueryDto">
+		select  u.nickname ,u.mobile,
+		w.pay_time,w.pay_type,w.fee ,w.charge_order_no,w.launch_area_name,w.device_name
+		from user u join user_wallet_charge_order w
+		on u.id = w.user_id
+		<include refid="query"></include>
+		order by w.pay_time desc
+		limit #{start},#{pagesize}
+	</select>
+
+	<sql id="query">
+		<where>
+			<if test="chargeNo != null and mobile != '' ">
+				and w.charge_order_no like concat('%',#{chargeNo},'%')
+			</if>
+			<if test="mobile != null and mobile != '' ">
+				and u.mobile like concat('%',#{mobile},'%')
+			</if>
+			<if test="nickName != null and nickName != '' ">
+				and u.nickName like concat('%',#{nickName},'%')
+			</if>
+			<if test="launchAreaName != null and launchAreaName != '' ">
+				and w.launch_area_name = #{launchAreaName}
+			</if>
+			<if test="begin != null">
+				and w.pay_time <![CDATA[ >= ]]> #{begin}
+			</if>
+			<if test="end != null">
+				and w.pay_time  <![CDATA[ <= ]]> #{end }
+			</if>
+			<if test="walletType != null and walletType != ''">
+				and w.wallet_type = #{walletType}
+			</if>
+			<if test="status != null">
+				and w.status = #{status}
+			</if>
+			<if test="userIds != null and userIds.get(0) != null">
+				and u.sys_user_id IN
+				<foreach item="item" index="index" collection="userIds" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+
+	<select id="countNum" resultType="Integer" parameterType="com.gizwits.lease.wallet.dto.DepositQueryDto">
+		select  count(*)
+		from user u join user_wallet_charge_order w
+		on u.id = w.user_id
+		<include refid="query"></include>
+	</select>
+
+	<select id="sumRealRecharge" resultType="double">
+		select ifnull((sum(balance)-sum(discount_money)), 0) as realRecharge from user_wallet_charge_order where status = 5 and pay_type = 6
+	</select>
+	
+	<select id="sumRealUse" resultType="double">
+		select ifnull(sum(fee), 0) as realUse from user_wallet_use_record where wallet_type = 1 and operation_type = 2
+	</select>
+	
+	<select id="sumRealGive" resultType="double">
+		select ifnull(sum(discount_money), 0) as realGive from user_wallet_charge_order where status = 5 and pay_type = 6
+	</select>
+	
+	<select id="sumRealGiveUse" resultType="double">
+		select ifnull(sum(fee), 0) as realGiveUse from user_wallet_use_record where wallet_type = 3 and operation_type = 2
+	</select>
+</mapper>

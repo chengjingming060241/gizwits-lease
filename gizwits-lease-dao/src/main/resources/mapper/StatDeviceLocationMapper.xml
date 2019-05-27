@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatDeviceLocationDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.stat.entity.StatDeviceLocation">
+        <id column="id" property="id"/>
+        <result column="ctime" property="ctime"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="province_id" property="provinceId"/>
+        <result column="product_id" property="productId"/>
+        <result column="province" property="province"/>
+        <result column="device_count" property="deviceCount"/>
+        <result column="proportion" property="proportion"/>
+    </resultMap>
+
+    <select id="getDistribution" resultMap="BaseResultMap">
+        <if test="productId!=null">
+            SELECT province,device_count,proportion FROM stat_device_location
+            WHERE sys_user_id = #{sysUserId}
+            AND date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+            AND product_id = #{productId}
+        </if>
+        <if test="productId==null">
+            SELECT province,SUM(device_count) as device_count,avg(proportion) as proportion FROM stat_device_location
+            WHERE sys_user_id = #{sysUserId}
+            AND date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+            GROUP BY province
+        </if>
+    </select>
+
+    <select id="getDistributionByIds" resultMap="BaseResultMap">
+        SELECT province,SUM(device_count) as device_count FROM stat_device_location
+        WHERE date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+        <if test="null != productId">
+            AND product_id = #{productId}
+        </if>
+        <if test="null !=ids and ids.size>0">
+            AND sys_user_id IN
+            <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY province
+    </select>
+
+    <select id="getRank" resultMap="BaseResultMap">
+        <if test="productId!=null">
+            SELECT province,device_count,proportion FROM stat_device_location
+            WHERE sys_user_id = #{sysUserId}
+            AND date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+            AND product_id = #{productId}
+            ORDER BY device_count DESC
+            limit 0,10
+        </if>
+        <if test="productId==null">
+            SELECT province,SUM(device_count) as device_count,avg(proportion) as proportion FROM stat_device_location
+            WHERE sys_user_id = #{sysUserId}
+            AND date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+            GROUP BY province
+            ORDER BY device_count DESC
+            limit 0,10
+        </if>
+    </select>
+
+    <select id="getRankByIds" resultMap="BaseResultMap">
+        SELECT province,SUM(device_count) as device_count,avg(proportion) as proportion FROM stat_device_location
+        WHERE date_format(ctime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+        <if test="null != productId and productId != 0">
+            AND product_id = #{productId}
+        </if>
+        <if test="null !=ids and ids.size>0">
+            AND sys_user_id IN
+            <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY province
+        ORDER BY device_count DESC
+        limit 0,10
+    </select>
+
+    <select id="countDeviceLocation">
+        insert into  stat_device_location(ctime,device_count,sys_user_id,product_id,province)
+        select #{ctime} as ctime, count(d.sno) as device_count
+        ,d.owner_id as sys_user_id ,d.product_id as product_id ,a.province as province
+        from device d,device_launch_area a
+        where d.launch_area_id = a.id and d.is_deleted =0 and d.status !=6 group by d.owner_id,d.product_id,a.province
+    </select>
+
+    <select id="countDeviceWithoutLocation">
+         insert into  stat_device_location(ctime,device_count,sys_user_id,product_id,province)
+         select #{ctime} as ctime, count(d.sno) as device_count
+         ,d.owner_id as sys_user_id ,d.product_id as product_id,"其他" as province
+         from device  d where d.launch_area_id is null and d.is_deleted =0 and d.status !=6 group by d.owner_id,d.product_id
+    </select>
+
+</mapper>

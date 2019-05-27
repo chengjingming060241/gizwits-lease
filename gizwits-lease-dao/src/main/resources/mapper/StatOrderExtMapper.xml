@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatOrderDao">
+
+    <select id="getOrderAvgAnalysis" resultType="hashmap">
+        select ifnull(avg(o.amount), 0) as avgMoneyp, ifnull(count(o.order_no)/count(d.sno), 0) as avgCount, ifnull(sum(o.amount)/count(d.sno), 0) as avgMoneym
+        from order_base o
+        left join device d on o.mac = d.mac and d.is_deleted = 0
+        left join operator r on o.sys_user_id = r.sys_account_id and r.is_deleted = 0
+        where o.order_status = 5
+        <if test="dto.launchAreaName != null and dto.launchAreaName != ''">
+            and o.launch_area_name like concat('%', #{dto.launchAreaName}, '%')
+        </if>
+        <if test="dto.operator != null and dto.operator != ''">
+            and r.name like concat('%', #{dto.operator}, '%')
+        </if>
+        <if test="dto.fromDate !=null and dto.toDate != null">
+            and Date_format(o.`pay_time`,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+            Date_format(#{dto.toDate},'%Y-%m-%d')
+        </if>
+        <if test="dto.sno != null and dto.sno != ''">
+            and o.sno = #{dto.sno}
+        </if>
+        <if test="dto.mac != null and dto.mac != ''">
+            and o.mac = #{dto.mac}
+        </if>
+    </select>
+    
+    <select id="getOrderCountAnalysis" resultType="hashmap">
+        select count(o.order_no) as Count, HOUR(o.pay_time) as Hour
+        from order_base o
+        left join device d on o.mac = d.mac and d.is_deleted = 0
+        left join operator r on o.sys_user_id = r.sys_account_id and r.is_deleted = 0
+        where o.order_status = 5
+        <if test="dto.launchAreaName != null and dto.launchAreaName != ''">
+            and o.launch_area_name like concat('%', #{dto.launchAreaName}, '%')
+        </if>
+        <if test="dto.operator != null and dto.operator != ''">
+            and r.name like concat('%', #{dto.operator}, '%')
+        </if>
+        <if test="dto.fromDate !=null and dto.toDate != null">
+            and Date_format(o.`pay_time`,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+            Date_format(#{dto.toDate},'%Y-%m-%d')
+        </if>
+        <if test="dto.sno != null and dto.sno != ''">
+            and o.sno = #{dto.sno}
+        </if>
+        <if test="dto.mac != null and dto.mac != ''">
+            and o.mac = #{dto.mac}
+        </if>
+        group by HOUR(o.pay_time)
+--         order by HOUR(o.pay_time)
+    </select>
+
+    <select id="getOrderMoneyAnalysis" resultType="hashmap">
+        select sum(o.amount) as Money, HOUR(o.pay_time) as Hour
+        from order_base o
+        left join device d on o.mac = d.mac and d.is_deleted = 0
+        left join operator r on o.sys_user_id = r.sys_account_id and r.is_deleted = 0
+        where o.order_status = 5
+        <if test="dto.launchAreaName != null and dto.launchAreaName != ''">
+            and o.launch_area_name like concat('%', #{dto.launchAreaName}, '%')
+        </if>
+        <if test="dto.operator != null and dto.operator != ''">
+            and r.name like concat('%', #{dto.operator}, '%')
+        </if>
+        <if test="dto.fromDate !=null and dto.toDate != null">
+            and Date_format(o.`pay_time`,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+            Date_format(#{dto.toDate},'%Y-%m-%d')
+        </if>
+        <if test="dto.sno != null and dto.sno != ''">
+            and o.sno = #{dto.sno}
+        </if>
+        <if test="dto.mac != null and dto.mac != ''">
+            and o.mac = #{dto.mac}
+        </if>
+        group by HOUR(o.pay_time)
+--         order by HOUR(o.pay_time)
+    </select>
+    
+    <select id="getOrderMoneyAreaAnalysis" resultType="hashmap">
+        select sum(o.amount) as Money, o.launch_area_name as LaunchAreaName
+        from order_base o
+        left join device d on o.mac = d.mac and d.is_deleted = 0
+        left join operator r on o.sys_user_id = r.sys_account_id and r.is_deleted = 0
+        where o.order_status = 5
+        <if test="dto.launchAreaName != null and dto.launchAreaName != ''">
+            and o.launch_area_name like concat('%', #{dto.launchAreaName}, '%')
+        </if>
+        <if test="dto.operator != null and dto.operator != ''">
+            and r.name like concat('%', #{dto.operator}, '%')
+        </if>
+        <if test="dto.fromDate !=null and dto.toDate != null">
+            and Date_format(o.`pay_time`,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+            Date_format(#{dto.toDate},'%Y-%m-%d')
+        </if>
+        <if test="dto.sno != null and dto.sno != ''">
+            and o.sno = #{dto.sno}
+        </if>
+        <if test="dto.mac != null and dto.mac != ''">
+            and o.mac = #{dto.mac}
+        </if>
+		group by o.launch_area_name
+		order by Money desc
+    </select>
+    
+    <select id="getOrderMoneyMachineAnalysis" resultType="hashmap">
+        select sum(o.amount) as Money, d.name as DeviceName
+        from order_base o
+        left join device d on o.mac = d.mac and d.is_deleted = 0
+        left join operator r on o.sys_user_id = r.sys_account_id and r.is_deleted = 0
+        where o.order_status = 5
+        <if test="dto.launchAreaName != null and dto.launchAreaName != ''">
+            and o.launch_area_name like concat('%', #{dto.launchAreaName}, '%')
+        </if>
+        <if test="dto.operator != null and dto.operator != ''">
+            and r.name like concat('%', #{dto.operator}, '%')
+        </if>
+        <if test="dto.fromDate !=null and dto.toDate != null">
+            and Date_format(o.`pay_time`,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+            Date_format(#{dto.toDate},'%Y-%m-%d')
+        </if>
+        <if test="dto.sno != null and dto.sno != ''">
+            and o.sno = #{dto.sno}
+        </if>
+        <if test="dto.mac != null and dto.mac != ''">
+            and o.mac = #{dto.mac}
+        </if>
+		group by d.name
+		order by Money desc
+    </select>
+
+</mapper>

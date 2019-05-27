@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatUserTrendDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.stat.entity.StatUserTrend">
+        <id column="id" property="id"/>
+        <result column="ctime" property="ctime"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="new_count" property="newCount"/>
+        <result column="active_count" property="activeCount"/>
+        <result column="total_count" property="totalCount"/>
+        <result column="male" property="male"/>
+        <result column="female" property="female"/>
+        <result column="zero" property="zero"/>
+        <result column="one_two" property="oneTwo"/>
+        <result column="three_four" property="threeFour"/>
+        <result column="five_six" property="fiveSix"/>
+        <result column="seven_eight" property="sevenEight"/>
+        <result column="nine_ten" property="nineTen"/>
+        <result column="ten_more" property="tenMore"/>
+    </resultMap>
+
+    <select id="getNewTrend" resultMap="BaseResultMap">
+        SELECT ctime,sum(new_count) new_count FROM stat_user_trend
+        <where>
+            <if test="null !=ids and ids.size>0">
+                AND sys_user_id IN
+                <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="dto.fromDate!=null and dto.toDate!=null">
+                And Date_format(ctime,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+                Date_format(#{dto.toDate},'%Y-%m-%d')
+            </if>
+        </where>
+        GROUP BY Date_format(ctime,'%Y-%m-%d')
+        ORDER BY ctime
+    </select>
+
+    <select id="getActiveTrend" resultMap="BaseResultMap">
+        SELECT ctime,sum(active_count) active_count FROM stat_user_trend
+        <where>
+            <if test="null !=ids and ids.size>0">
+                AND sys_user_id IN
+                <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="dto.fromDate!=null and dto.toDate!=null">
+                And Date_format(ctime,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+                Date_format(#{dto.toDate},'%Y-%m-%d')
+            </if>
+        </where>
+        GROUP BY Date_format(ctime,'%Y-%m-%d')
+        ORDER BY ctime
+    </select>
+
+    <select id="getTotalTrend" resultMap="BaseResultMap">
+        SELECT ctime,sum(total_count) total_count FROM stat_user_trend
+        <where>
+            <if test="null !=ids and ids.size>0">
+                AND sys_user_id IN
+                <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="dto.fromDate!=null and dto.toDate!=null">
+                And Date_format(ctime,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and
+                Date_format(#{dto.toDate},'%Y-%m-%d')
+            </if>
+        </where>
+        GROUP BY Date_format(ctime,'%Y-%m-%d')
+        ORDER BY ctime
+    </select>
+
+    <select id="getSex"  resultMap="BaseResultMap">
+        SELECT sum(male) male,sum(female) female FROM stat_user_trend
+        WHERE DATE_FORMAT(ctime,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+        <if test="null !=ids and ids.size>0">
+            AND sys_user_id IN
+            <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getTimes"  resultMap="BaseResultMap">
+        SELECT sum(zero) zero,sum(one_two) one_two,sum(three_four) three_four,sum(five_six) five_six,
+        sum(seven_eight) seven_eight,sum(nine_ten) nine_ten,sum(ten_more) ten_more FROM stat_user_trend
+        WHERE DATE_FORMAT(ctime,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+        <if test="null !=ids and ids.size>0">
+            AND sys_user_id IN
+            <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+</mapper>

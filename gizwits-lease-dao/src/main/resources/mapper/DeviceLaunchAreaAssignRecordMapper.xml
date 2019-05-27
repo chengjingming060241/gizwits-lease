@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.device.dao.DeviceLaunchAreaAssignRecordDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.device.entity.DeviceLaunchAreaAssignRecord">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="device_launch_area_id" property="deviceLaunchAreaId" />
+		<result column="device_launch_area_name" property="deviceLaunchAreaName" />
+		<result column="source_owner_id" property="sourceOwnerId" />
+		<result column="target_owner_id" property="targetOwnerId" />
+		<result column="operate_type" property="operateType" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="sys_user_name" property="sysUserName" />
+	</resultMap>
+
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.manager.dao.OperatorDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.manager.entity.Operator">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="name" property="name" />
+		<result column="industry" property="industry" />
+		<result column="web_site" property="webSite" />
+		<result column="logo_url" property="logoUrl" />
+		<result column="phone" property="phone" />
+		<result column="mobile" property="mobile" />
+		<result column="contact" property="contact" />
+		<result column="department" property="department" />
+		<result column="description" property="description" />
+		<result column="email" property="email" />
+		<result column="qq" property="qq" />
+		<result column="province" property="province" />
+		<result column="city" property="city" />
+		<result column="area" property="area" />
+		<result column="address" property="address" />
+		<!--<result column="manufacturer_id" property="manufacturerId" />-->
+		<!--<result column="parent_operator_id" property="parentOperatorId" />-->
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="share_benefit_rule_id" property="shareBenefitRuleId" />
+		<result column="is_allot" property="isAllot"/>
+		<result column="cover_level" property="coverLevel"/>
+		<result column="is_deleted" property="isDeleted"/>
+	</resultMap>
+	<resultMap id="CascaderMap" type="com.gizwits.lease.manager.dto.OperatorForCascaderDto">
+		<result column="id" property="value"/>
+		<result column="name" property="label"/>
+	</resultMap>
+
+	
+	<select id="getAllParentOperator" resultMap="CascaderMap">
+		select id, name from operator where is_deleted = 0 and sys_user_id not in (select sys_account_id from operator where is_deleted = 0)
+	</select>
+
+	<select id="getAllChildOperatorById" resultMap="CascaderMap">
+		select id, name from operator where is_deleted = 0 and sys_user_id = #{sysUserId}
+	</select>
+</mapper>

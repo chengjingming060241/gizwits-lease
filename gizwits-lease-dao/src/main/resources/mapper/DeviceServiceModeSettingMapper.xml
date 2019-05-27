@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.device.dao.DeviceServiceModeSettingDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.device.entity.DeviceServiceModeSetting">
+		<id column="id" property="id" />
+		<result column="sno" property="sno" />
+		<result column="sys_account_id" property="sysAccountId" />
+		<result column="is_free" property="isFree" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="is_deleted" property="isDeleted" />
+		<result column="assign_account_id" property="assignAccountId" />
+	</resultMap>
+	
+	<update id="deleteDeviceServiceModeSettingByAssignAccountIdAndSnoList">
+		UPDATE device_service_mode_setting
+		SET is_deleted=1
+		WHERE assign_account_id=#{assignAccountId} AND sno IN
+		<foreach collection="snoList" open="(" separator="," close=")" item="item" >
+			#{item}
+		</foreach>
+	</update>
+	
+	<update id="deleteDeviceServiceModeSettingByAssignAccountIdAndSno">
+		UPDATE device_service_mode_setting
+		SET is_deleted=1
+		WHERE assign_account_id=#{assignAccountId} AND sno=#{sno}
+	</update>
+
+</mapper>

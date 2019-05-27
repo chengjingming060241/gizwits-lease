@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.product.dao.ProductCommandConfigDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.product.entity.ProductCommandConfig">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="command_type" property="commandType" />
+		<result column="status_command_type" property="statusCommandType" />
+		<result column="name" property="name" />
+		<result column="command" property="command" />
+		<result column="is_show" property="isShow" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="is_deleted" property="isDeleted" />
+		<result column="is_free" property="isFree" />
+		<result column="working_mode" property="workingMode" />
+		<result column="is_clock_correct" property="isClockCorrect" />
+		<result column="calculate_value" property="calculateValue" />
+		<result column="error_range" property="errorRange" />
+		<result column="clock_correct_datapoint" property="clockCorrectDatapoint" />
+		<result column="identity_name" property="identityName" />
+		<result column="ref_dp" property="refDataPoint" />
+		<result column="show_type" property="showType" />
+	</resultMap>
+
+	<resultMap id="ProductCommandConfigVO" type="com.gizwits.lease.product.vo.ProductCommandVO">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="command_type" property="commandType" />
+		<result column="status_command_type" property="statusCommandType" />
+		<result column="name" property="name" />
+		<result column="command" property="command" />
+		<result column="product_key" property="productKey" />
+		<result column="is_free" property="isFree" />
+	</resultMap>
+
+	
+	<select id="findAllUseableStatusCommandConfig" resultMap="ProductCommandConfigVO">
+		SELECT c.*,p.gizwits_product_key as product_key
+		FROM product_command_config c, product p
+		WHERE p.id=c.product_id and c.is_deleted=0 AND p.is_deleted=0 AND p.status=1
+	</select>
+
+</mapper>

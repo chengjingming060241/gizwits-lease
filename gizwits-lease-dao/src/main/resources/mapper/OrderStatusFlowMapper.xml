@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.order.dao.OrderStatusFlowDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.order.entity.OrderStatusFlow">
+		<id column="id" property="id" />
+		<result column="order_no" property="orderNo" />
+		<result column="pre_status" property="preStatus" />
+		<result column="now_status" property="nowStatus" />
+		<result column="ctime" property="ctime" />
+		<result column="creatorId" property="creatorId" />
+		<result column="remark" property="remark" />
+	</resultMap>
+
+</mapper>

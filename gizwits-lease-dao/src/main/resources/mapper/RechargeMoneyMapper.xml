@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.wallet.dao.RechargeMoneyDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.wallet.entity.RechargeMoney">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="type" property="type" />
+		<result column="charge_money" property="chargeMoney" />
+		<result column="discount_money" property="discountMoney" />
+		<result column="rate" property="rate" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="project_id" property="projectId" />
+		<result column="sort" property="sort" />
+	</resultMap>
+
+</mapper>

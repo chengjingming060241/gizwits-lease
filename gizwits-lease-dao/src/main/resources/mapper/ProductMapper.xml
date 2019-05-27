@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.product.dao.ProductDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.product.entity.Product">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="name" property="name" />
+		<result column="img_url" property="imgUrl" />
+		<result column="gizwits_product_key" property="gizwitsProductKey" />
+		<result column="gizwits_product_secret" property="gizwitsProductSecret" />
+		<result column="status" property="status" />
+		<result column="category_id" property="categoryId" />
+		<result column="category_name" property="categoryName" />
+		<result column="manufacturer_id" property="manufacturerId" />
+		<result column="brand_id" property="brandId" />
+		<result column="communicate_type" property="communicate_type" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="is_deleted" property="isDeleted" />
+		<result column="gizwits_enterprise_id" property="gizwitsEnterpriseId" />
+		<result column="gizwits_enterprise_secret" property="gizwitsEnterpriseSecret" />
+		<result column="gizwits_appid" property="gizwitsAppId" />
+		<result column="gizwits_appsecret" property="gizwitsAppSecret" />
+		<result column="auth_id" property="authId" />
+		<result column="auth_secret" property="authSecret" />
+		<result column="subkey" property="subkey" />
+		<result column="events" property="events" />
+		<result column="qrcode_type" property="qrcodeType" />
+		<result column="location_type" property="locationType" />
+		<result column="wx_product_id" property="wxProductId" />
+	</resultMap>
+
+	<select id="findAllUseableProduct" resultMap="BaseResultMap">
+		SELECT * FROM product where status=1 and is_deleted=0
+	</select>
+
+	<select id="getProductBySno" resultMap="BaseResultMap">
+		SELECT * FROM product p,device d
+		WHERE p.`id` = d.`product_id`
+		AND d.`sno` = #{sno} and d.is_deleted=0 and p.is_deleted=0
+	</select>
+
+	<select id="getAllProductId" resultType="java.lang.Integer">
+		select id from product where is_deleted=0 and status=1
+	</select>
+
+	<select id="getProductIdAndKey" resultType="map">
+		select id as productId,`gizwits_product_key` as productKey
+		from product  where is_deleted=0 and status=1
+	</select>
+</mapper>

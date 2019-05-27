@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatUsingWaterDao">
+
+    <select id="getHourAnalysis" resultType="hashmap">
+      SELECT HOUR(o.pay_time) as Hour,count(1) as Count
+      FROM order_base o
+      LEFT JOIN operator r on o.sys_user_id = r.sys_account_id
+      WHERE o.order_status = 5
+        <if test="fromDate != null and toDate != null">
+            AND date(o.pay_time) BETWEEN DATE_FORMAT(#{fromDate}, '%Y-%m-%d') AND DATE_FORMAT(#{toDate}, '%Y-%m-%d')
+        </if>
+        <if test="launchAreaName != null and launchAreaName != ''">
+            AND o.launch_area_name like concat('%',#{launchAreaName},'%')
+        </if>
+        <if test="operator != null and operator != ''">
+            AND r.name like concat('%',#{operator},'%')
+        </if>
+      GROUP BY HOUR(o.pay_time) ORDER BY Hour(o.pay_time);
+    </select>
+</mapper>

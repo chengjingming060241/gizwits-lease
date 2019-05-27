@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.product.dao.ProductServiceDetailDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.product.entity.ProductServiceDetail">
+        <id column="id" property="id" />
+        <result column="ctime" property="ctime" />
+        <result column="utime" property="utime" />
+        <result column="service_mode_id" property="serviceModeId" />
+        <result column="product_id" property="productId" />
+        <result column="service_type" property="serviceType" />
+        <result column="service_type_id" property="serviceTypeId" />
+        <result column="price" property="price" />
+        <result column="num" property="num" />
+        <result column="unit" property="unit" />
+        <result column="status" property="status" />
+        <result column="sys_user_id" property="sysUserId" />
+        <result column="sys_user_name" property="sysUserName" />
+        <result column="command" property="command" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+
+    <select id="getMinPriceDetailByServiceModeId" resultMap="BaseResultMap">
+      SELECT num,price,normal_num,normal_price,cold_num,cold_price,warm_num,warm_price  FROM product_service_detail
+      WHERE service_mode_id = #{serviceModeId} and status = 1 and is_deleted=0
+       ORDER BY price
+       limit 0,1
+    </select>
+
+</mapper>

@@ -1,0 +1,2 @@
+INSERT INTO panel (utime, ctime, type, module, module_item, sort, uri, `condition`) VALUES ('2017-08-18 17:27:15', '2017-08-18 17:27:17', 1, 5, 31, 31, null, null);
+INSERT INTO panel (utime, ctime, type, module, module_item, sort, uri, `condition`) VALUES ('2017-08-18 17:27:42', '2017-08-18 17:27:45', 1, 5, 32, 32, null, null);

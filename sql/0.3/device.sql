@@ -1,0 +1,1 @@
+ALTER TABLE device ADD owner_id INT(11) NULL COMMENT '拥有者，默认为创建者';

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatFaultAlertTypeDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.stat.entity.StatFaultAlertType">
+        <id column="id" property="id"/>
+        <result column="ctime" property="ctime"/>
+        <result column="product_id" property="productId"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="show_name" property="showName"/>
+        <result column="identity_name" property="identityName"/>
+        <result column="remark" property="remark"/>
+        <result column="sno" property="sno"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <select id="getDataForStat" resultMap="BaseResultMap">
+        select pdp.identity_name as identity_name, pdp.remark as remark, count(da.id) as count
+        from device_alarm da
+        left join device d on da.sno = d.sno
+        left join product_data_point pdp on da.attr = pdp.identity_name
+        <where>
+            <if test="dto.productId !=null and dto.productId != 0">
+                AND d.product_id = #{dto.productId}
+            </if>
+            <if test="null != ids and ids.size> 0">
+                AND d.owner_id IN
+                <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        group by pdp.identity_name
+
+        <!--SELECT identity_name,remark,sum(`count`) `count` from-->
+        <!--(-->
+            <!--SELECT identity_name,remark,max(`count`) `count`from stat_fault_alert_type-->
+            <!--WHERE 1=1-->
+            <!--<if test="dto.productId !=null and dto.productId != 0">-->
+                <!--AND product_id = #{dto.productId}-->
+            <!--</if>-->
+            <!--&lt;!&ndash; 为什么要按日期找？前端没有这个需求啊。再说了，这个表是每次统计都会覆盖故障数量，但不会更新ctime的，这样ctime没有意义 &ndash;&gt;-->
+            <!--&lt;!&ndash;<if test="dto.fromDate !=null and dto.toDate != null">&ndash;&gt;-->
+                <!--&lt;!&ndash;And Date_format(`ctime`,'%Y-%m-%d') between Date_format(#{dto.fromDate},'%Y-%m-%d') and&ndash;&gt;-->
+                <!--&lt;!&ndash;Date_format(#{dto.toDate},'%Y-%m-%d')&ndash;&gt;-->
+            <!--&lt;!&ndash;</if>&ndash;&gt;-->
+            <!--<if test="null != ids and ids.size> 0">-->
+                <!--AND sys_user_id IN-->
+                <!--<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">-->
+                    <!--#{item}-->
+                <!--</foreach>-->
+            <!--</if>-->
+            <!--&lt;!&ndash; 根据统计时的规则，device换了ownerId就会重新记录一条，所以这里要去重 &ndash;&gt;-->
+            <!--group by sno, identity_name-->
+        <!--) t-->
+        <!--GROUP BY identity_name-->
+    </select>
+
+    <update id="updateByCtimeAndSysUserIdAndSno">
+		UPDATE stat_fault_alert_type
+		SET `count` = #{count}
+	  	WHERE sys_user_id = #{sysUserId}
+	  	AND DATE_FORMAT(ctime,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+	  	AND sno = #{sno}
+	  	AND identity_name = #{identity_name}
+	</update>
+</mapper>

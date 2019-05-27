@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.stat.dao.StatDeviceOrderWidgetDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.stat.entity.StatDeviceOrderWidget">
+        <id column="id" property="id"/>
+        <result column="ctime" property="ctime"/>
+        <result column="utime" property="utime"/>
+        <result column="sys_user_id" property="sysUserId"/>
+        <result column="product_id" property="productId"/>
+        <result column="total_count" property="totalCount"/>
+        <result column="new_count" property="newCount"/>
+        <result column="ordered_count" property="orderedCount"/>
+        <result column="ordered_percent" property="orderedPercent"/>
+        <result column="alarm_count" property="alarmCount"/>
+        <result column="warn_count" property="warnCount"/>
+        <result column="warn_record" property="warnRecord"/>
+        <result column="alarm_percent" property="alarmPercent"/>
+        <result column="order_count_today" property="orderCountToday"/>
+        <result column="order_count_yesterday" property="orderCountYesterday"/>
+        <result column="order_count_before_yesterday" property="orderCountBeforeYesterday"/>
+        <result column="order_new_percent_yesterday" property="orderNewPercentYesterday"/>
+        <result column="order_count_month" property="orderCountMonth"/>
+        <result column="share_order_count" property="shareOrderCount"/>
+        <result column="share_order_money" property="shareOrderMoney"/>
+    </resultMap>
+
+    <update id="updateByUtimeAndSysUserIdAndProductId">
+		UPDATE stat_device_order_widget
+		SET total_count = #{widget.totalCount},new_count=#{widget.newCount},ordered_percent = #{widget.orderedPercent},
+		         alarm_count=#{widget.alarmCount},order_count_today=#{widget.orderCountToday},
+		        warn_count = #{widget.warnCount},warn_record=#{widget.warnRecord},utime=#{widget.utime},
+		        alarm_percent = #{widget.alarmPercent},ordered_count = #{widget.orderedCount}
+	  	WHERE sys_user_id =#{widget.sysUserId}
+	  	AND DATE_FORMAT(utime,'%Y-%m-%d') = DATE_FORMAT(#{widget.utime},'%Y-%m-%d')
+	  	AND product_id = #{productId}
+	</update>
+
+    <select id="selectByUtimeAndSysUserIdAndProductId" resultMap="BaseResultMap">
+        select id,ctime,utime,total_count,new_count,ordered_count,order_count_month,order_count_yesterday,order_count_today from stat_device_order_widget
+        	WHERE sys_user_id =#{sysUserId}
+	  	AND DATE_FORMAT(utime,'%Y-%m-%d') = DATE_FORMAT(#{now},'%Y-%m-%d')
+	  	AND product_id = #{productId}
+    </select>
+
+    <sql id="fromWidget">
+			from stat_device_order_widget
+			where sys_user_id = #{sysUserId}
+			and date_format(utime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+	</sql>
+
+    <sql id="fromWidgetByIds">
+        from stat_device_order_widget
+        where date_format(utime,'%Y-%m-%d') = date_format(#{date},'%Y-%m-%d')
+        <if test="productId != null and productId != 0">
+            AND product_id = #{productId}
+        </if>
+        <if test="null !=ids and ids.size>0">
+            AND sys_user_id IN
+            <foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
+    </sql>
+
+    <select id="orderWidget" resultMap="BaseResultMap">
+        <if test="productId != null">
+            select
+            order_count_today,order_count_yesterday,order_count_before_yesterday,order_new_percent_yesterday,order_count_month
+            <include refid="fromWidget"/>
+            AND product_id = #{productId}
+        </if>
+        <if test="productId==null">
+            select sum(order_count_today) order_count_today,
+            sum(order_count_yesterday) order_count_yesterday,
+            sum(order_count_before_yesterday) order_count_before_yesterday,
+            sum(order_new_percent_yesterday) order_new_percent_yesterday,
+            sum(order_count_month) order_count_month
+            <include refid="fromWidget"/>
+        </if>
+    </select>
+
+    <select id="orderWidgetByIds" resultMap="BaseResultMap">
+        select sum(order_count_today) order_count_today,
+        sum(order_count_yesterday) order_count_yesterday,
+        sum(order_count_before_yesterday) order_count_before_yesterday,
+        sum(order_new_percent_yesterday) order_new_percent_yesterday,
+        sum(order_count_month) order_count_month,
+        sum(share_order_count) share_order_count,
+        sum(share_order_money) share_order_money
+        <include refid="fromWidgetByIds"/>
+    </select>
+
+    <select id="deviceWidget" resultMap="BaseResultMap">
+        <if test="productId != null">
+            select total_count,new_count,ordered_percent,alarm_count
+            <include refid="fromWidget"/>
+            AND product_id = #{productId}
+        </if>
+        <if test="productId == null">
+            select sum(total_count) as total_count,sum(new_count) as new_count ,sum(ordered_percent) as ordered_percent,
+            sum(alarm_count) as alarm_count
+            <include refid="fromWidget"/>
+        </if>
+    </select>
+
+    <select id="deviceWidgetByIds" resultMap="BaseResultMap">
+        select sum(total_count) as total_count,sum(new_count) as new_count ,sum(ordered_percent) as ordered_percent,
+        sum(alarm_count) as alarm_count,sum(ordered_count) as ordered_count
+        <include refid="fromWidgetByIds"/>
+    </select>
+
+
+    <select id="alarmWidget" resultMap="BaseResultMap">
+        <if test="productId != null">
+            select (warn_count+alarm_count) AS warn_count,warn_record,alarm_percent
+            <include refid="fromWidget"/>
+            AND product_id = #{productId}
+        </if>
+        <if test="productId == null">
+            select sum(warn_count) warn_count,sum(warn_record) warn_record,sum(alarm_percent) alarm_percent
+            <include refid="fromWidget"/>
+        </if>
+    </select>
+
+    <select id="alarmWidgetByIds" resultMap="BaseResultMap">
+        select sum(alarm_count) alarm_count,sum(warn_count) warn_count,sum(warn_record) warn_record,sum(total_count) total_count
+        <include refid="fromWidgetByIds"/>
+    </select>
+
+    <select id="getOrderNewPercent" resultType="double">
+	SELECT order_new_percent_yesterday
+	FROM stat_device_order_widget
+	WHERE sys_user_id = #{sysUserId}
+	AND product_id=#{productId}
+	AND DATE_FORMAT(ctime,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+</select>
+
+
+    <select id="deleteAlreadyEsixtData">
+        delete from stat_device_order_widget
+        <where>
+            <if test="sysUserId != null and sysUserId != ''">
+                sys_user_id = #{sysUserId}
+            </if>
+            <if test="null !=productList and productList.size>0">
+                AND product_id  not IN
+                <foreach item="item" index="index" collection="productList" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="null != date">
+                AND DATE_FORMAT(ctime,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+            </if>
+        </where>
+    </select>
+
+    <select id="count15DaysDevices" resultType="int">
+        select count(1) from device where 0 <![CDATA[<=]]> DATEDIFF(CURRENT_DATE,DATE_FORMAT(expiration_time, '%Y-%m-%d')) <![CDATA[<=]]> 15 and is_deleted = 0
+    </select>
+    
+    <select id="countOffDevices" resultType="int">
+        select count(1) from device where online_status = 2 and operate_status = 1 and is_deleted = 0
+    </select>
+
+    <select id="countRemain10Devices" resultType="int">
+        select count(1) from device where is_deleted = 0 and remain_water/total_water <![CDATA[<]]> 0.1
+    </select>
+    
+    <select id="sumTotalAmountToday" resultType="double">
+        select sum(amount) as totalAmount from order_base where order_status = 5 and date(ctime) = CURRENT_DATE
+    </select>
+    
+    <select id="sumOperatorAndSort" resultType="hashmap">
+        SELECT
+	      r.name as name,ifnull(sum( o.amount ), 0) AS amount
+        FROM
+	      operator r
+	    LEFT JOIN order_base o ON o.sys_user_id = r.sys_account_id and o.order_status = 5
+        WHERE
+	      r.is_deleted = 0
+        GROUP BY
+	      r.NAME
+        ORDER BY
+	      amount DESC
+    </select>
+</mapper>

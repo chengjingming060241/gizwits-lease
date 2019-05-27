@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.product.dao.ProductCategoryDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.product.entity.ProductCategory">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="name" property="name" />
+		<result column="remark" property="remark" />
+		<result column="parent_category_id" property="parentCategoryId" />
+		<result column="is_deleted" property="isDeleted"/>
+	</resultMap>
+
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.device.dao.DeviceAlarmDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.device.entity.DeviceAlarm">
+		<id column="id" property="id" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="name" property="name" />
+		<result column="attr" property="attr" />
+		<result column="happen_time" property="happenTime" />
+		<result column="fixed_time" property="fixedTime" />
+		<result column="status" property="status" />
+		<result column="mac" property="mac" />
+		<result column="longitude" property="longitude" />
+		<result column="latitude" property="latitude" />
+		<result column="notify_user_id" property="notifyUserId" />
+		<result column="sno" property="sno" />
+		<result column="product_key" property="productKey" />
+        <result column="alarm_type" property="alarmType" />
+    </resultMap>
+
+	<resultMap id="infoDto" type="com.gizwits.lease.device.entity.dto.DeviceAlramInfoDto">
+		<id column="id" property="id" />
+		<result column="sno" property="sno" />
+		<result column="deviceMac" property="deviceMac" />
+		<result column="deviceName" property="deviceName" />
+		<result column="deviceAlarmName" property="deviceAlarmName" />
+		<result column="attr" property="attr" />
+		<result column="happen_time" property="happenTime" />
+		<result column="fixed_time" property="fixTime" />
+		<result column="status" property="status" />
+		<result column="deviceLaunchArea" property="deviceLaunchArea" />
+		<result column="deviceLaunchAreaId" property="deviceLaunchAreaId" />
+		<result column="alarm_type" property="alarmType" />
+	</resultMap>
+
+
+	<select id="listPage" resultMap="infoDto" parameterType="com.gizwits.lease.device.entity.dto.DeviceAlarmQueryDto">
+		select a.id,a.happen_time ,
+		a.fixed_time,a.mac as deviceMac,
+		a.sno ,a.status,a.name as deviceAlarmName,a.alarm_type,
+		d.name as deviceName,
+		d.launch_area_name as deviceLaunchArea,
+		d.launch_area_id as deviceLaunchAreaId,a.attr
+		from device_alarm a join device d on a.sno = d.sno
+		<include refid="whereSql"></include>
+
+		ORDER BY  a.happen_time DESC
+		<include refid="limit_data"></include>
+	</select>
+
+	<sql id="whereSql">
+		<where>
+			<if test="deviceMac != null and deviceMac != ''">
+				and a.mac LIKE  concat('%',#{deviceMac},'%')
+			</if>
+			<if test="deviceName != null and deviceName != ''">
+				and d.name like concat('%',#{deviceName},'%')
+			</if>
+			<if test="deviceLaunchArea != null and deviceLaunchArea != ''">
+				and d.launch_area_name like concat('%',#{deviceLaunchArea},'%')
+			</if>
+			<if test="deviceSno != null and deviceSno != ''">
+				and a.sno like concat('%',#{deviceSno},'%')
+			</if>
+			<if test="deviceAlramName != null and deviceAlramName != ''">
+				and a.name like concat('%',#{deviceAlramName},'%')
+			</if>
+			<if test="status != null and status >=0 ">
+				and a.status = #{status}
+			</if>
+			<if test="snos != null and snos.size() != 0  ">
+				and a.sno IN
+				<foreach item="item" index="index" collection="snos" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="ids != null and ids.size() != 0  ">
+				and a.id IN
+				<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<select id="appListPage" resultMap="infoDto" parameterType="com.gizwits.lease.device.entity.dto.DeviceAlarmAppListDto">
+		select a.id,a.happen_time ,
+		a.fixed_time,a.mac as deviceMac,
+		a.sno ,a.status,a.name as deviceAlarmName,a.alarm_type,
+		d.name as deviceName,
+		d.launch_area_name as deviceLaunchArea,
+		d.launch_area_id as deviceLaunchAreaId,a.attr
+		from device_alarm a join device d on a.sno = d.sno
+		<include refid="appWhereSql"></include>
+
+		ORDER BY  a.happen_time DESC
+		<include refid="limit_data"></include>
+	</select>
+
+	<sql id="appWhereSql">
+		<where>
+			<if test="snos.size() != 0  ">
+				and a.sno IN
+				<foreach item="item" index="index" collection="snos" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<select id="appListPage" resultMap="infoDto" parameterType="com.gizwits.lease.device.entity.dto.DeviceAlarmAppListDto">
+		select a.id,a.happen_time ,
+		a.fixed_time,a.mac as deviceMac,
+		a.sno ,a.status,a.name as deviceAlarmName,a.alarm_type,
+		d.name as deviceName,
+		d.launch_area_name as deviceLaunchArea,
+		d.launch_area_id as deviceLaunchAreaId
+		from device_alarm a join device d on a.sno = d.sno
+		<include refid="appWhereSql"></include>
+
+		ORDER BY  a.happen_time DESC
+		<include refid="limit_data"></include>
+	</select>
+
+	<sql id="limit_data">
+		limit #{start},#{pageSize}
+
+	</sql>
+
+
+	<select id="getDeviceAlarmName" resultType="String" >
+		select DISTINCT (a.name) FROM  device_alarm a
+		<include refid="appWhereSql"></include>
+	</select>
+
+	<select id="findDeviceUnresolveAlarm" resultMap="BaseResultMap">
+		SELECT a.*
+		FROM device_alarm a
+		WHERE a.mac=#{mac} AND a.product_key=#{productKey} AND a.attr=#{attr} AND a.status=#{status}
+		ORDER BY ctime limit 1
+	</select>
+
+	<select id="getRecord" resultType="java.lang.Integer">
+		SELECT COUNT(a.`id`) FROM device d,device_alarm a
+		WHERE d.`sno`=a.`sno`
+		AND d.`owner_id` = #{sysUserId}
+		<if test="productId !=null">
+			AND d.`product_id`= #{productId}
+		</if>
+	  AND DATE_FORMAT(a.`ctime`,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+	</select>
+
+	<select id="countNum" resultType="Integer" parameterType="com.gizwits.lease.device.entity.dto.DeviceAlarmQueryDto">
+		select count(*)
+		from device_alarm a join device d on a.sno = d.sno
+		<include refid="whereSql"></include>
+	</select>
+
+	<select id="appCountNum" resultType="Integer" parameterType="com.gizwits.lease.device.entity.dto.DeviceAlarmAppListDto">
+		select count(*)
+		from device_alarm a join device d on a.sno = d.sno
+		<include refid="appWhereSql"></include>
+	</select>
+
+</mapper>

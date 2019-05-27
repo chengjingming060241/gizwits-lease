@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.benefit.dao.ShareBenefitRuleDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.benefit.entity.ShareBenefitRule">
+		<id column="id" property="id" />
+		<result column="share_benefit_rule_name" property="shareBenefitRuleName" />
+		<result column="operator_id" property="operatorId" />
+		<result column="operator_name" property="operatorName" />
+		<result column="start_time" property="startTime" />
+		<result column="frequency" property="frequency" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="last_execute_time" property="lastExecuteTime" />
+		<result column="sys_user_id" property="sysUserId" />
+		<result column="sys_account_id" property="sysAccountId" />
+		<result column="is_deleted" property="isDeleted" />
+		<result column="audit_id" property="auditId"/>
+		<result column="audit_name" property="auditName"/>
+	</resultMap>
+
+
+	<update id="updateRuleLastExecuteTime" >
+		UPDATE share_benefit_rule SET last_execute_time=now(),utime=now() WHERE id=#{ruleId}
+	</update>
+</mapper>

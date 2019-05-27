@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.product.dao.ProductDataPointDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.product.entity.ProductDataPoint">
+		<id column="id" property="id" />
+		<result column="product_id" property="productId" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="show_name" property="showName" />
+		<result column="identity_name" property="identityName" />
+		<result column="read_write_type" property="readWriteType" />
+		<result column="data_type" property="dataType" />
+		<result column="remark" property="remark" />
+		<result column="is_monit" property="isMonit" />
+		<result column="is_deleted" property="isDeleted"/>
+	</resultMap>
+	
+	<select id="findAllMonitPoint" resultMap="BaseResultMap">
+		SELECT d.*
+		FROM product_data_point d,product p
+		WHERE d.product_id=p.id and p.is_deleted=0 AND d.is_monit=1 and p.gizwits_product_key=#{productKey}
+	</select>
+
+</mapper>

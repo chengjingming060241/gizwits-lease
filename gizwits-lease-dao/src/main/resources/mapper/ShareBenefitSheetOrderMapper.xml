@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.benefit.dao.ShareBenefitSheetOrderDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gizwits.lease.benefit.entity.ShareBenefitSheetOrder">
+        <id column="id" property="id"/>
+        <result column="sheet_no" property="sheetNo"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="device_sno" property="deviceSno"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="share_rule_detail_id" property="shareRuleDetailId"/>
+        <result column="share_percentage" property="sharePercentage"/>
+        <result column="children_share_percentage" property="childrenSharePercentage"/>
+        <result column="share_money" property="shareMoney"/>
+        <result column="order_amount" property="orderAmount"/>
+        <result column="status" property="status"/>
+        <result column="ctime" property="ctime"/>
+        <result column="utime" property="utime"/>
+        <result column="order_pay_time" property="orderPayTime"/>
+        <result column="pay_type" property="payType"/>
+    </resultMap>
+
+    <update id="updateOrderStatusBySheetNo">
+		UPDATE share_benefit_sheet_order SET status=#{status},utime=now() WHERE sheet_no=#{sheetNo} and status=#{preStatus}
+	</update>
+
+    <update id="updateAllSheetOrderStatus">
+        UPDATE share_benefit_sheet_order SET status=#{status},utime=now() WHERE sheet_no=#{sheetNo}
+    </update>
+
+    <select id="getOrderCount" resultType="int">
+        SELECT COUNT(1) FROM share_benefit_sheet_order s,device d
+        WHERE s.`device_sno` = d.`sno`
+        AND DATE_FORMAT(s.`ctime`,'%Y-%m-%d') = DATE_FORMAT(#{date},'%Y-%m-%d')
+        <if test="productId != null and productId != 0">
+            AND d.`product_id` = #{productId}
+        </if>
+        AND d.`owner_id` = #{sysUserId}
+    </select>
+    
+    
+    <select id="selectSheetOrderByRuleIdAndSnoAndOrderNo" resultMap="BaseResultMap">
+        SELECT *
+        FROM share_benefit_sheet sheet,share_benefit_sheet_order o
+        where o.sheet_no=sheet.sheet_no AND sheet.rule_id=#{ruleId} AND o.order_no=#{orderNo} AND o.device_sno=#{sno}
+    </select>
+
+
+    <select id="sumSheetOrderMoney" resultType="java.math.BigDecimal">
+        SELECT sum(share_money)
+        FROM share_benefit_sheet_order
+        WHERE sheet_no=#{sheetNo}
+        <if test="orderList != null and orderList.size() != 0  ">
+            and id NOT IN
+            <foreach item="item" index="index" collection="orderList" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectSumOrderAmountAndShareMoney" resultMap="BaseResultMap">
+        SELECT SUM(order_amount) AS order_amount, SUM(share_money) AS share_money
+        FROM share_benefit_sheet_order
+        WHERE sheet_no = #{sheetNo}
+        <if test="orderNoList != null and orderNoList.size() > 0">
+            AND order_no IN
+            <foreach item="orderNo" index="index" collection="orderNoList" open="(" separator="," close=")">
+                #{orderNo}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="sumSheetOrderTotalMoney" resultType="java.math.BigDecimal">
+        SELECT sum(order_amount)
+        FROM share_benefit_sheet_order
+        WHERE sheet_no=#{sheetNo}
+    </select>
+
+
+    <update id="updateBatchSheetOrderStatus">
+        UPDATE share_benefit_sheet_order
+        SET status=#{status},utime=now()
+        WHERE sheet_no=#{sheetNo} AND order_no IN
+        <foreach item="item" index="index" collection="sheetOrderList" open="(" separator="," close=")">
+            #{item.orderNo}
+        </foreach>
+    </update>
+</mapper>

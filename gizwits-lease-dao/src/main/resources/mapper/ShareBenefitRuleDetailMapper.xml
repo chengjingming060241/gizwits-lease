@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gizwits.lease.benefit.dao.ShareBenefitRuleDetailDao">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.gizwits.lease.benefit.entity.ShareBenefitRuleDetail">
+		<id column="id" property="id" />
+		<result column="rule_id" property="ruleId" />
+		<result column="name" property="name" />
+		<result column="share_percentage" property="sharePercentage" />
+		<result column="share_type" property="shareType" />
+		<result column="ctime" property="ctime" />
+		<result column="utime" property="utime" />
+		<result column="is_deleted" property="isDeleted" />
+	</resultMap>
+
+	<select id="findDetailByRuleIdAndSno" resultMap="BaseResultMap">
+		SELECT detail.*
+		FROM share_benefit_rule rule,share_benefit_rule_detail detail,share_benefit_rule_detail_device device
+		WHERE rule.id=detail.rule_id and detail.id=device.rule_detail_id and rule.is_deleted=0 and detail.is_deleted=0 and device.is_deleted=0 and rule.id=#{ruleId} and device.sno=#{sno}
+	</select>
+	
+	<update id="updateRuleDetailAndDeviceToDeleted" >
+		UPDATE share_benefit_rule_detail detail INNER JOIN share_benefit_rule_detail_device device ON detail.id=device.rule_detail_id
+		SET detail.is_deleted=1,detail.utime=now(),device.is_deleted=1,device.utime=now()
+		WHERE detail.rule_id=#{ruleId}
+	</update>
+</mapper>
