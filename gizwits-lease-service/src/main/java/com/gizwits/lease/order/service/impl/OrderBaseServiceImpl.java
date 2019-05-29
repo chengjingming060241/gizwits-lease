@@ -1106,11 +1106,21 @@ public class OrderBaseServiceImpl extends ServiceImpl<OrderBaseDao, OrderBase> i
         return appOrderVo;
     }
 
+    //异常
     @Override
     public void handleAbnormalOrder(OrderBase orderBase, OrderAbnormalReason reason) {
         orderBase.setAbnormalReason(reason.getCode());
         updateOrderStatusAndHandle(orderBase, OrderStatus.ABNORMAL.getCode());
     }
+
+    //已退款
+    @Override
+    public void handleRefundOrder(OrderBase orderBase, OrderAbnormalReason reason) {
+        orderBase.setAbnormalReason(reason.getCode());
+        updateOrderStatusAndHandle(orderBase, OrderStatus.REFUNDED.getCode());
+    }
+
+
 
     @Override
     public List<OrderBase> findByUserIdAndStatus(Integer id, Integer code) {

@@ -164,6 +164,7 @@ public class WxPayCallbackListener {
         }
         CommonSystemConfig commonSystemConfig = SysConfigUtils.get(CommonSystemConfig.class);
         long controlTime = firstControlTime;
+        //设置超时时间
         long controlTimeOut = Long.parseLong(commonSystemConfig.getControlTimeOut()) * 1000;
         int currentTryTimes = 0;
         int limitTryTimes = Integer.parseInt(commonSystemConfig.getControlTryTimes());
@@ -221,7 +222,7 @@ public class WxPayCallbackListener {
                     logger.info("====>>> 设备{}在{}秒内没有上报过数据！！！", device.getMac(), controlTimeOut / 1000);
 
                     if (currentTryTimes >= limitTryTimes) {
-                        logger.info("====>>> 订单{}达到重发上限{}次，处理为异常", orderBase.getOrderNo(), limitTryTimes);
+                        logger.info("====>>> 订单{}达到重发上限{}次，处理为已退款", orderBase.getOrderNo(), limitTryTimes);
                         orderDataFlowService.saveAbnormalData(orderBase, OrderDataFlowRoute.DEVICE_TO_SERVER, null
                                 , OrderAbnormalReason.DEVICE_STATUS_TIMEOUT.getDescription());
                         handleDeviceStatusTimeOut(orderBase, device);
@@ -231,7 +232,7 @@ public class WxPayCallbackListener {
                     logger.info("====>>> 设备{}在{}秒内上报的数据不符合使用中状态的配置！！！", device.getMac(), controlTimeOut / 1000);
 
                     if (currentTryTimes >= limitTryTimes) {
-                        logger.info("====>>> 订单{}达到重发上限{}次，处理为异常", orderBase.getOrderNo(), limitTryTimes);
+                        logger.info("====>>> 订单{}达到重发上限{}次，处理为已退款", orderBase.getOrderNo(), limitTryTimes);
                         orderDataFlowService.saveAbnormalData(orderBase, OrderDataFlowRoute.DEVICE_TO_SERVER, nowData.toJSONString()
                                 , OrderAbnormalReason.DEVICE_STATUS_WRONG.getDescription());
                         handleDeviceStatusWrong(orderBase, device);
@@ -255,8 +256,8 @@ public class WxPayCallbackListener {
      * @param device
      */
     private void handleDeviceStatusWrong(OrderBase orderBase, Device device){
-        // 设置订单异常
-        orderBaseService.handleAbnormalOrder(orderBase, OrderAbnormalReason.DEVICE_STATUS_WRONG);
+        // 设置订单为已退款
+        orderBaseService.handleRefundOrder(orderBase, OrderAbnormalReason.DEVICE_STATUS_WRONG);
         // 生成工单
         // workOrderService.fromAbnormalOrder(orderBase);
         // 执行退款
@@ -274,8 +275,11 @@ public class WxPayCallbackListener {
      * @param device
      */
     private void handleDeviceStatusTimeOut(OrderBase orderBase, Device device){
-        // 设置订单异常
-        orderBaseService.handleAbnormalOrder(orderBase, OrderAbnormalReason.DEVICE_STATUS_TIMEOUT);
+        // 设置订单为已退款
+        orderBaseService.handleRefundOrder(orderBase, OrderAbnormalReason.DEVICE_STATUS_TIMEOUT);
+
+        // 执行退款
+        refundApplyService.refund(orderBase);
         // 锁定设备
         Integer lockTimes = Integer.valueOf(SysConfigUtils.get(CommonSystemConfig.class).getControlLockTimes());
         int currentAbnormalTimes = device.getAbnormalTimes() + 1;

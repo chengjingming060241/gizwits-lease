@@ -177,6 +177,9 @@ public interface OrderBaseService extends IService<OrderBase> {
 
     void finish(String orderNo);
 
+    //处理已退款
+    void handleRefundOrder(OrderBase orderBase, OrderAbnormalReason reason);
+
 	/**
 	 * 获取用户每条充值记录并联最后一次消费的投放点等信息
 	 * @param userId

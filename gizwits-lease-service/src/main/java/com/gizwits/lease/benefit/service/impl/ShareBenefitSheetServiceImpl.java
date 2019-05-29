@@ -561,6 +561,9 @@ public class ShareBenefitSheetServiceImpl extends ServiceImpl<ShareBenefitSheetD
                 shareBenefitRuleService.updateRuleLastExecuteTime(rule.getId());
                 shareBenefitSheetOrderService.insertBatch(sheetOrderList);
             }
+        }else{
+            logger.warn("====分润规则{},没有对应的设备====", rule.getId());
+            return false;
         }
         return false;
     }

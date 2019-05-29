@@ -259,6 +259,12 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyDao, RefundAp
 		return true;
 	}
 
+
+	/**
+	 * 退款
+	 * @param orderBase 退款
+	 * @return
+	 */
 	@Override
 	public boolean refund(OrderBase orderBase) {
 		log.info("=====>>> 执行退款操作，orderNo：{}", orderBase.getOrderNo());
